@@ -1,0 +1,13 @@
+﻿<div class="btn-group btn-group-toggle search-toggles" data-toggle="buttons">
+    @foreach(var optionName in GroupInfo.Options)
+    {
+        <label class="btn btn-primary @GroupInfo.GetActive(optionName) search-toggle-btn">
+            <input type="radio" name="options" autocomplete="off" checked="@(GroupInfo.SelectedOption == optionName)" @onchange="()=>GroupInfo.SelectedOption = optionName"/> @optionName
+        </label>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public Data.ToggleGroupInfoData GroupInfo { get; set; }
+}

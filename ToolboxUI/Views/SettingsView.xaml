@@ -1,0 +1,739 @@
+﻿<UserControl x:Class="ToolboxUI.Views.SettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:cal="http://www.caliburnproject.org"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+             xmlns:local="clr-namespace:ToolboxUI.Views"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="780">
+    <UserControl.Resources>
+        <!-- For large content, better go for a Virtualizing StackPanel -->
+        <ItemsPanelTemplate x:Key="ItemsTemplate">
+            <VirtualizingStackPanel/>
+        </ItemsPanelTemplate>
+    </UserControl.Resources>
+
+
+    <DockPanel>
+
+        <!--#region Menu Bar-->
+        <Menu DockPanel.Dock="Top"
+              Background="{DynamicResource lightWhiteBrush}"
+              Padding="4">
+
+            <MenuItem Header="_File">
+
+                <MenuItem Header="_Quit">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="Click">
+                            <cal:ActionMessage MethodName="QuitToolbox"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </MenuItem>
+
+            </MenuItem>
+
+            <MenuItem Header="_Navigation">
+
+                <MenuItem Header="_Data Architecture">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="Click">
+                            <cal:ActionMessage MethodName="NavigateToDataArchitecture"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </MenuItem>
+
+                <MenuItem Header="_Terms and Definitions">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="Click">
+                            <cal:ActionMessage MethodName="NavigateToTermsAndDefinitions"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </MenuItem>
+
+            </MenuItem>
+        </Menu>
+        <!--#endregion-->
+
+        <!--#region Content -->
+        <Grid DockPanel.Dock="Top">
+
+            <!--#region Grid Layout-->
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <!--#endregion-->
+
+            <!--#region Content-->
+            <Border Grid.Column="0"
+                      Grid.Row="0"
+                    Margin="5"
+                    Style="{DynamicResource TooltipBorder}">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Style="{DynamicResource TooltipHeader}">Selected User</TextBlock>
+                    <ComboBox x:Name="Users"
+                              Margin="5"></ComboBox>
+                </StackPanel>
+            </Border>
+            
+            <TabControl x:Name="tabControl"
+                        Grid.Column="0"
+                        Grid.ColumnSpan="2"
+                        Grid.Row="1"
+                        Style="{DynamicResource ColoredTabControl}"
+                        Margin="10">
+
+                <!--#region Permissions-->
+                <TabItem Name="Permissions"
+                         Header="Permissions"
+                         Style="{DynamicResource ColoredTabItem}">
+
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel>
+                            <!--#region  Data Architecture-->
+                            <Expander Header="Data Architecture"
+                                      ExpandDirection="Down"
+                                      BorderThickness="1"
+                                      Margin="5"
+                                      Padding="5"
+                                      BorderBrush="{DynamicResource lightBlackBrush}"
+                                      Background="{DynamicResource darkWhiteBrush}">
+
+                                <Grid Margin="5">
+
+                                    <!--#region Data Architecture Layout-->
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="30"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <!--#endregion-->
+
+                                    <!--#region Data Architecture Content-->
+                                    <!--#region Data Architecture Visibility-->
+                                    <TextBlock
+                                        Grid.Column="0"
+                                        Grid.ColumnSpan="2"
+                                        Grid.Row="0"
+                                        Style="{DynamicResource HeaderTextBlock}"
+                                        Text="Data Architecture">
+                                    </TextBlock>
+
+                                    <ToggleButton
+                                        x:Name="DataArchitecturePage_CanView"
+                                        Grid.Column="2"
+                                        Grid.Row="0"
+                                        IsChecked="{Binding DataArchitecture_CanView_Access}"
+                                        IsEnabled="{Binding CanEdit}"
+                                        Style="{DynamicResource ColoredToggleSwitch}">
+                                        Active
+                                    </ToggleButton>
+
+                                    <TextBlock
+                                        Grid.Column="0"
+                                        Grid.ColumnSpan="2"
+                                        Grid.Row="1"
+                                        Text="This permission controls if the user can view the Data Architecture page.  If the user does not have this permission, all of the following nested permissions will be unavailable as well."
+                                        TextWrapping="Wrap">
+                                    </TextBlock>
+                                    <!--#endregion-->
+
+                                    <!--#region Can Run Database Scrapes-->
+                                    <Separator 
+                                        Grid.Column="0"
+                                        Grid.ColumnSpan="3"
+                                        Grid.Row="2"
+                                        Background="{DynamicResource lightWhiteBrush}"
+                                        BorderBrush ="Transparent"
+                                        Margin="3" />
+                                    
+                                    <TextBlock
+                                        Grid.Column="1"
+                                        Grid.Row="3"
+                                        Style="{DynamicResource HeaderTextBlock}"
+                                        Text="Run Database Scrapes">
+                                    </TextBlock>
+
+                                    <ToggleButton
+                                        x:Name="DataArchitecture_CanRunDatabaseScrape"
+                                        Grid.Column="2"
+                                        Grid.Row="3"
+                                        IsChecked="{Binding DataArchitecture_CanRunDatabaseScrape_Access}"
+                                        IsEnabled="{Binding DataArchitecturePage_PermissionEditing_IsEnabled}"
+                                        Style="{DynamicResource ColoredToggleSwitch}">
+                                        Active
+                                    </ToggleButton>
+
+                                    <TextBlock
+                                        Grid.Column="1"
+                                        Grid.Row="4"
+                                        Text="This permission controls if the user can run database scrapes to update the interactive documentation from the Data Architecture page."
+                                        TextWrapping="Wrap">
+                                    </TextBlock>
+                                    <!--#endregion-->
+
+                                    <!--#region Can Run Schema Scrapes-->
+                                    <Separator 
+                                        Grid.Column="0"
+                                        Grid.ColumnSpan="3"
+                                        Grid.Row="5"
+                                        Background="{DynamicResource lightWhiteBrush}"
+                                        BorderBrush ="Transparent"
+                                        Margin="3" />
+
+                                    <TextBlock
+                                        Grid.Column="1"
+                                        Grid.Row="6"
+                                        Style="{DynamicResource HeaderTextBlock}"
+                                        Text="Run Schema Scrapes">
+                                    </TextBlock>
+
+                                    <ToggleButton
+                                        x:Name="DataArchitecture_CanRunSchemaScrape"
+                                        Grid.Column="2"
+                                        Grid.Row="6"
+                                        IsChecked="{Binding DataArchitecture_CanRunSchemaScrape_Access}"
+                                        IsEnabled="{Binding DataArchitecturePage_PermissionEditing_IsEnabled}"
+                                        Style="{DynamicResource ColoredToggleSwitch}">
+                                        Active
+                                    </ToggleButton>
+
+                                    <TextBlock
+                                        Grid.Column="1"
+                                        Grid.Row="7"
+                                        Text="This permission controls if the user can run schema scrapes to update the interactive documentation from the Data Architecture page."
+                                        TextWrapping="Wrap">
+                                    </TextBlock>
+                                    <!--#endregion-->
+
+                                    <!--#region Can Run Table Scrapes-->
+                                    <Separator 
+                                        Grid.Column="0"
+                                        Grid.ColumnSpan="3"
+                                        Grid.Row="8"
+                                        Background="{DynamicResource lightWhiteBrush}"
+                                        BorderBrush ="Transparent"
+                                        Margin="3" />
+
+                                    <TextBlock
+                                        Grid.Column="1"
+                                        Grid.Row="9"
+                                        Style="{DynamicResource HeaderTextBlock}"
+                                        Text="Run Table Scrapes">
+                                    </TextBlock>
+
+                                    <ToggleButton
+                                        x:Name="DataArchitecture_CanRunTableScrape"
+                                        Grid.Column="2"
+                                        Grid.Row="9"
+                                        IsChecked="{Binding DataArchitecture_CanRunTableScrape_Access}"
+                                        IsEnabled="{Binding DataArchitecturePage_PermissionEditing_IsEnabled}"
+                                        Style="{DynamicResource ColoredToggleSwitch}">
+                                        Active
+                                    </ToggleButton>
+
+                                    <TextBlock
+                                        Grid.Column="1"
+                                        Grid.Row="10"
+                                        Text="This permission controls if the user can run table scrapes to update the interactive documentation from the Data Architecture page."
+                                        TextWrapping="Wrap">
+                                    </TextBlock>
+                                    <!--#endregion-->
+
+                                    <!--#region Can Run Field Scrapes-->
+                                    <Separator 
+                                        Grid.Column="0"
+                                        Grid.ColumnSpan="3"
+                                        Grid.Row="11"
+                                        Background="{DynamicResource lightWhiteBrush}"
+                                        BorderBrush ="Transparent"
+                                        Margin="3" />
+
+                                    <TextBlock
+                                        Grid.Column="1"
+                                        Grid.Row="12"
+                                        Style="{DynamicResource HeaderTextBlock}"
+                                        Text="Run Field Scrapes">
+                                    </TextBlock>
+
+                                    <ToggleButton
+                                        x:Name="DataArchitecture_CanRunFieldScrape"
+                                        Grid.Column="2"
+                                        Grid.Row="12"
+                                        IsChecked="{Binding DataArchitecture_CanRunFieldScrape_Access}"
+                                        IsEnabled="{Binding DataArchitecturePage_PermissionEditing_IsEnabled}"
+                                        Style="{DynamicResource ColoredToggleSwitch}">
+                                        Active
+                                    </ToggleButton>
+
+                                    <TextBlock
+                                        Grid.Column="1"
+                                        Grid.Row="13"
+                                        Text="This permission controls if the user can run field scrapes on fields within a table to update the interactive documentation from the Data Architecture page."
+                                        TextWrapping="Wrap">
+                                    </TextBlock>
+                                    <!--#endregion-->
+
+                                    <!--#region Can Find Data Table Lineage-->
+                                    <Separator 
+                                        Grid.Column="0"
+                                        Grid.ColumnSpan="3"
+                                        Grid.Row="14"
+                                        Background="{DynamicResource lightWhiteBrush}"
+                                        BorderBrush ="Transparent"
+                                        Margin="3" />
+
+                                    <TextBlock
+                                        Grid.Column="1"
+                                        Grid.Row="15"
+                                        Style="{DynamicResource HeaderTextBlock}"
+                                        Text="Find Data Table Lineage">
+                                    </TextBlock>
+
+                                    <ToggleButton
+                                        x:Name="DataArchitecture_CanFindDataTableLineage"
+                                        Grid.Column="2"
+                                        Grid.Row="15"
+                                        IsChecked="{Binding DataArchitecture_CanFindDataTableLineage_Access}"
+                                        IsEnabled="{Binding DataArchitecturePage_PermissionEditing_IsEnabled}"
+                                        Style="{DynamicResource ColoredToggleSwitch}">
+                                        Active
+                                    </ToggleButton>
+
+                                    <TextBlock
+                                        Grid.Column="1"
+                                        Grid.Row="16"
+                                        Text="This permission controls if the user can find data table lineage records within the staging database using the SSIS sub package records. This will update the interactive documentation from the Data Architecture page."
+                                        TextWrapping="Wrap">
+                                    </TextBlock>
+                                    <!--#endregion-->
+
+                                    <!--#region Can View Development Server-->
+                                    <Separator 
+                                        Grid.Column="0"
+                                        Grid.ColumnSpan="3"
+                                        Grid.Row="17"
+                                        Background="{DynamicResource lightWhiteBrush}"
+                                        BorderBrush ="Transparent"
+                                        Margin="3" />
+
+                                    <TextBlock
+                                        Grid.Column="1"
+                                        Grid.Row="18"
+                                        Style="{DynamicResource HeaderTextBlock}"
+                                        Text="View Development Servers">
+                                    </TextBlock>
+
+                                    <ToggleButton
+                                        x:Name="DataArchitecture_CanViewDevelopmentServers"
+                                        Grid.Column="2"
+                                        Grid.Row="18"
+                                        IsChecked="{Binding DataArchitecture_CanViewDevelopmentServers_Access}"
+                                        IsEnabled="{Binding DataArchitecturePage_PermissionEditing_IsEnabled}"
+                                        Style="{DynamicResource ColoredToggleSwitch}">
+                                        Active
+                                    </ToggleButton>
+
+                                    <TextBlock
+                                        Grid.Column="1"
+                                        Grid.Row="19"
+                                        Text="This permission controls if the user can view development servers from the Data Architecture page."
+                                        TextWrapping="Wrap">
+                                    </TextBlock>
+                                    <!--#endregion-->
+                                    <!--#endregion-->
+
+                                </Grid>
+
+                            </Expander>
+                            <!--#endregion-->
+
+                            <!--#region Settings-->
+                            <Expander Header="Settings"
+                                      ExpandDirection="Down"
+                                      BorderThickness="1"
+                                      Margin="5"
+                                      Padding="5"
+                                      BorderBrush="{DynamicResource lightBlackBrush}"
+                                      Background="{DynamicResource darkWhiteBrush}">
+
+                                <Grid Margin="5">
+
+                                    <!--#region Settings Layout-->
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="30"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <!--#endregion-->
+
+                                    <!--#region Settings Content-->
+                                    <!--#region Settings Visibility-->
+                                    <TextBlock
+                                        Grid.Column="0"
+                                        Grid.ColumnSpan="2"
+                                        Grid.Row="0"
+                                        Style="{DynamicResource HeaderTextBlock}"
+                                        Text="Settings">
+                                    </TextBlock>
+
+                                    <ToggleButton
+                                        x:Name="Settings_CanView"
+                                        Grid.Column="2"
+                                        Grid.Row="0"
+                                        IsChecked="{Binding Settings_CanView_Access}"
+                                        IsEnabled="{Binding CanEdit}"
+                                        Style="{DynamicResource ColoredToggleSwitch}">
+                                        Active
+                                    </ToggleButton>
+
+                                    <TextBlock
+                                        Grid.Column="0"
+                                        Grid.ColumnSpan="2"
+                                        Grid.Row="1"
+                                        Text="This permission controls if the user can view the Settings page.  If the user does not have this permission, all of the following nested permissions will be unavailable as well."
+                                        TextWrapping="Wrap">
+                                    </TextBlock>
+                                    <!--#endregion-->
+
+                                    <!--#region Settings Permissions Visibility-->
+                                    <Separator 
+                                        Grid.Column="0"
+                                        Grid.ColumnSpan="3"
+                                        Grid.Row="2"
+                                        Background="{DynamicResource lightWhiteBrush}"
+                                        BorderBrush ="Transparent"
+                                        Margin="3" />
+
+                                    <TextBlock
+                                        Grid.Column="1"
+                                        Grid.Row="3"
+                                        Style="{DynamicResource HeaderTextBlock}"
+                                        Text="Permissions">
+                                    </TextBlock>
+
+                                    <ToggleButton
+                                        x:Name="Settings_Permissions_CanView"
+                                        Grid.Column="2"
+                                        Grid.Row="3"
+                                        IsChecked="{Binding Settings_Permissions_CanView_Access}"
+                                        IsEnabled="{Binding SettingsPage_PermissionEditing_IsEnabled}"
+                                        Style="{DynamicResource ColoredToggleSwitch}">
+                                        Active
+                                    </ToggleButton>
+
+                                    <TextBlock
+                                        Grid.Column="1"
+                                        Grid.Row="4"
+                                        Text="Controls whether the user has access to the Permissions tab on the Settings page."
+                                        TextWrapping="Wrap">
+                                    </TextBlock>
+                                    <!--#endregion-->
+
+                                    <!--#region Can Edit Subordinate User Permissions-->
+                                    <Separator 
+                                        Grid.Column="0"
+                                        Grid.ColumnSpan="3"
+                                        Grid.Row="5"
+                                        Background="{DynamicResource lightWhiteBrush}"
+                                        BorderBrush ="Transparent"
+                                        Margin="3" />
+
+                                    <TextBlock
+                                        Grid.Column="1"
+                                        Grid.Row="6"
+                                        Style="{DynamicResource HeaderTextBlock}"
+                                        Text="Edit Subordinate Permissions">
+                                    </TextBlock>
+
+                                    <ToggleButton
+                                        x:Name="Settings_Permissions_CanEditSubordinatePermissions"
+                                        Grid.Column="2"
+                                        Grid.Row="6"
+                                        IsChecked="{Binding Settings_Permissions_CanEditSubordinatePermissions_Access}"                                       
+                                        IsEnabled="{Binding SettingsPage_PermissionEditing_IsEnabled}"
+                                        Style="{DynamicResource ColoredToggleSwitch}">
+                                        Active
+                                    </ToggleButton>
+
+
+                                    <TextBlock
+                                        Grid.Column="1"
+                                        Grid.Row="7"
+                                        Text="Controls whether the user can edit permissions for subordinates on the Settings page."
+                                        TextWrapping="Wrap">
+                                    </TextBlock>
+                                    <!--#endregion-->
+
+                                    <!--#region Can Edit Own Permissions-->
+                                    <Separator 
+                                        Grid.Column="0"
+                                        Grid.ColumnSpan="3"
+                                        Grid.Row="8"
+                                        Background="{DynamicResource lightWhiteBrush}"
+                                        BorderBrush ="Transparent"
+                                        Margin="3" />
+
+                                    <TextBlock
+                                        Grid.Column="1"
+                                        Grid.Row="9"
+                                        Style="{DynamicResource HeaderTextBlock}"
+                                        Text="Edit Own Permissions">
+                                    </TextBlock>
+
+                                    <ToggleButton
+                                        x:Name="Settings_CanEditOwnPermissions"
+                                        Grid.Column="2"
+                                        Grid.Row="9"
+                                        IsChecked="{Binding Settings_Permissions_CanEditOwnPermissions_Access}" 
+                                        IsEnabled="{Binding SettingsPage_PermissionEditing_IsEnabled}"
+                                        Style="{DynamicResource ColoredToggleSwitch}">
+                                        Active
+                                    </ToggleButton>
+
+                                    <TextBlock
+                                        Grid.Column="1"
+                                        Grid.Row="10"
+                                        Text="Controls whether the user can edit their permissions on the Settings page."
+                                        TextWrapping="Wrap">
+                                    </TextBlock>
+                                    <!--#endregion-->
+
+                                    <!--#endregion-->
+
+                                </Grid>
+
+                            </Expander>
+                            <!--#endregion-->
+
+                            <!--#region Terms and Definitions-->
+                            <Expander Header="Terms and Definitions"
+                                      ExpandDirection="Down"
+                                      BorderThickness="1"
+                                      Margin="5"
+                                      Padding="5"
+                                      BorderBrush="{DynamicResource lightBlackBrush}"
+                                      Background="{DynamicResource darkWhiteBrush}">
+
+                                <Grid>
+
+                                    <!--#region Terms and Definitions Layout-->
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="30"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <!--#endregion-->
+
+                                    <!--#region Terms and Definitions Content-->
+                                    <!--#region Terms and Definitions Visibility-->
+                                    <TextBlock
+                                        Grid.Column="0"
+                                        Grid.ColumnSpan="2"
+                                        Grid.Row="0"
+                                        Style="{DynamicResource HeaderTextBlock}"
+                                        Text="Terms and Definitions">
+                                    </TextBlock>
+
+                                    <ToggleButton
+                                        x:Name="TermsAndDefinitionsPage_CanView"
+                                        Grid.Column="2"
+                                        Grid.Row="0"
+                                        IsChecked="{Binding TermsAndDefinitions_CanView_Access}"
+                                        IsEnabled="{Binding CanEdit}"
+                                        Style="{DynamicResource ColoredToggleSwitch}">
+                                        Active
+                                    </ToggleButton>
+
+                                    <TextBlock
+                                        Grid.Column="0"
+                                        Grid.ColumnSpan="2"
+                                        Grid.Row="1"
+                                        Text="This permission controls if the user can view the Terms and Definitions page.  If the user does not have this permission, all of the following nested permissions will be unavailable as well."
+                                        TextWrapping="Wrap">
+                                    </TextBlock>
+                                    <!--#endregion-->
+
+                                    <!--#region Can Add Term-->
+                                    <Separator 
+                                        Grid.Column="0"
+                                        Grid.ColumnSpan="3"
+                                        Grid.Row="2"
+                                        Background="{DynamicResource lightWhiteBrush}"
+                                        BorderBrush ="Transparent"
+                                        Margin="3" />
+
+                                    <TextBlock
+                                        Grid.Column="1"
+                                        Grid.Row="3"
+                                        Style="{DynamicResource HeaderTextBlock}"
+                                        Text="Add New Terms">
+                                    </TextBlock>
+
+                                    <ToggleButton
+                                        x:Name="TermsAndDefinitionsPage_CanAddTerm"
+                                        Grid.Column="2"
+                                        Grid.Row="3"
+                                        IsChecked="{Binding TermsAndDefinitions_CanAddTerm_Access}"
+                                        IsEnabled="{Binding TermsAndDefinitionsPage_PermissionEditing_IsEnabled}"
+                                        Style="{DynamicResource ColoredToggleSwitch}">
+                                        Active
+                                    </ToggleButton>
+
+                                    <TextBlock
+                                        Grid.Column="1"
+                                        Grid.Row="4"
+                                        Text="This permission controls if the user can approve new terms and defintions to be used."
+                                        TextWrapping="Wrap">
+                                    </TextBlock>
+                                    <!--#endregion-->
+
+                                    <!--#region Can Edit Term-->
+                                    <Separator 
+                                        Grid.Column="0"
+                                        Grid.ColumnSpan="3"
+                                        Grid.Row="5"
+                                        Background="{DynamicResource lightWhiteBrush}"
+                                        BorderBrush ="Transparent"
+                                        Margin="3" />
+
+                                    <TextBlock
+                                        Grid.Column="1"
+                                        Grid.Row="6"
+                                        Style="{DynamicResource HeaderTextBlock}"
+                                        Text="Edit Existing Terms">
+                                    </TextBlock>
+
+                                    <ToggleButton
+                                        x:Name="TermsAndDefinitionsPage_CanEditTerm"
+                                        Grid.Column="2"
+                                        Grid.Row="6"
+                                        IsChecked="{Binding TermsAndDefinitions_CanEditTerm_Access}"
+                                        IsEnabled="{Binding TermsAndDefinitionsPage_PermissionEditing_IsEnabled}"
+                                        Style="{DynamicResource ColoredToggleSwitch}">
+                                        Active
+                                    </ToggleButton>
+
+
+                                    <TextBlock
+                                        Grid.Column="1"
+                                        Grid.Row="7"
+                                        Text="This permission controls if the user can update or edit existing terms and definitions on the Terms and Definitions page."
+                                        TextWrapping="Wrap">
+                                    </TextBlock>
+                                    <!--#endregion-->
+
+                                    <!--#region Can Remove Terms-->
+                                    <Separator 
+                                        Grid.Column="0"
+                                        Grid.ColumnSpan="3"
+                                        Grid.Row="8"
+                                        Background="{DynamicResource lightWhiteBrush}"
+                                        BorderBrush ="Transparent"
+                                        Margin="3" />
+
+                                    <TextBlock
+                                        Grid.Column="1"
+                                        Grid.Row="9"
+                                        Style="{DynamicResource HeaderTextBlock}"
+                                        Text="Remove Terms">
+                                    </TextBlock>
+
+                                    <ToggleButton
+                                        x:Name="TermsAndDefinitionsPage_CanRemoveTerms"
+                                        Grid.Column="2"
+                                        Grid.Row="9"
+                                        IsChecked="{Binding TermsAndDefinitions_CanRemoveTerm_Access}"
+                                        IsEnabled="{Binding TermsAndDefinitionsPage_PermissionEditing_IsEnabled}"
+                                        Style="{DynamicResource ColoredToggleSwitch}">
+                                        Active
+                                    </ToggleButton>
+
+                                    <TextBlock
+                                        Grid.Column="1"
+                                        Grid.Row="10"
+                                        Text="This permission controls if the user can remove terms and definitions from the Terms and Definitions page."
+                                        TextWrapping="Wrap">
+                                    </TextBlock>
+                                    <!--#endregion-->
+
+                                    <!--#endregion-->
+
+                                </Grid>
+
+                            </Expander>
+                            <!--#endregion-->
+
+                        </StackPanel>
+                    </ScrollViewer>
+
+                </TabItem>
+                <!--#endregion-->
+
+            </TabControl>
+            <!--#endregion-->
+
+        </Grid>
+        <!--#endregion-->
+
+    </DockPanel>
+</UserControl>

@@ -1,0 +1,26 @@
+﻿CREATE TYPE [dbo].[ConstraintFieldModelType] AS TABLE
+(
+	IndexFieldId INT NULL,
+	ServerId INT NULL,
+	ServerName NVARCHAR(150) null,
+	DatabaseId INT NULL,
+	DatabaseName NVARCHAR(150) null,
+	SchemaId INT NULL,
+	SchemaName NVARCHAR(150) null,
+	TableId INT NULL,
+	TableName NVARCHAR(150) null,
+	ConstraintId INT NULL,
+	ConstraintName NVARCHAR(150) null,
+	FieldId INT NULL,
+	FieldName NVARCHAR(150) NULL,
+	IsNullable BIT null,
+	IsAnsiPadded BIT NULL,
+	IsRowGuidColumn BIT NULL,
+	IsIdentity BIT NULL,
+	GeneratedAlwaysType TINYINT NULL,
+	GeneratedAlwaysTypeDescription NVARCHAR(60) NULL,
+	CreatedDate DATETIME2(7) NULL,
+	CreatedBy NVARCHAR(50) NULL,
+	UpdatedDate DATETIME2(7) NULL,
+	UpdatedBy NVARCHAR(50) NULL
+)

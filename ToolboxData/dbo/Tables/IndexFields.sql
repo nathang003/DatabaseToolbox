@@ -1,0 +1,18 @@
+﻿CREATE TABLE [dbo].[IndexFields]
+(
+	[IndexFieldId] INT NOT NULL PRIMARY KEY IDENTITY(1,1),
+	ServerId INT NOT NULL DEFAULT -1,
+	DatabaseId INT NOT NULL DEFAULT -1,
+	SchemaId INT NOT NULL DEFAULT -1,
+	TableId INT NOT NULL DEFAULT -1,
+	IndexId INT NOT NULL DEFAULT -1,
+	FieldId INT NOT NULL DEFAULT -1, 
+	KeyOrdinal SMALLINT NULL,
+	PartialOrdinal SMALLINT NULL,
+	IsDescendingKey BIT NULL,
+	IsIncludedColumn BIT NULL,
+	CreatedDate DATETIME2(7) NULL,
+	CreatedBy NVARCHAR(50) NULL,
+	UpdatedDate DATETIME2(7) NULL,
+	UpdatedBy NVARCHAR(50) NULL
+)

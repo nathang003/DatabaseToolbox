@@ -1,0 +1,39 @@
+﻿@inherits LayoutComponentBase
+
+<PageTitle>ToolboxWebUI</PageTitle>
+
+<div class="page">
+
+    <div class="sidebar @NavMenuCssClass">
+        <NavMenu />
+    </div>
+
+    <div class="main">
+        <div class="topbar top-row px-4 auth">
+            <button title="Navigation menu" class="nav-toggle navbar-toggler" @onclick="ToggleNavMenu">
+                <span class="oi oi-menu"></span>
+            </button>
+            <LoginDisplay />
+        </div>
+
+        <div class="content px-4">
+            @Body
+        </div>
+        <footer>
+            <div class="copyright">© 2017 myNexus</div>
+        </footer>
+    </div>
+</div>
+
+<BlazoredToasts />
+
+@code {
+    private bool collapseNavMenu = true;
+
+    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+}

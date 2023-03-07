@@ -1,0 +1,41 @@
+﻿
+@using Microsoft.Identity.Web
+@using Microsoft.Graph
+@inject Microsoft.Graph.GraphServiceClient GraphServiceClient
+@inject MicrosoftIdentityConsentAndConditionalAccessHandler ConsentHandler
+
+<AuthorizeView>
+    <Authorized>
+        @if(user is not null)
+        {
+            @*<div class="greeting">Hello, @context.User.Identity?.Name!</div>*@
+            <div class="greeting">Hello, @user.GivenName!</div>
+        }
+        else
+        {
+            <div class="greeting">Hello!</div>
+        }
+        <a href="settings">Settings</a>
+        <a href="MicrosoftIdentity/Account/SignOut">Log out</a>
+    </Authorized>
+    <NotAuthorized>
+        <a href="MicrosoftIdentity/Account/SignIn">Log in</a>
+    </NotAuthorized>
+</AuthorizeView>
+
+
+@code {
+    User? user;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            user = await GraphServiceClient.Me.Request().GetAsync();
+        }
+        catch (Exception ex)
+        {
+            ConsentHandler.HandleException(ex);
+        }
+    }
+}

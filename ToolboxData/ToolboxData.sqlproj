@@ -1,0 +1,188 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <Name>ToolboxData</Name>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectVersion>4.1</ProjectVersion>
+    <ProjectGuid>{925aec76-c2e8-485d-8f87-083cfad1d410}</ProjectGuid>
+    <DSP>Microsoft.Data.Tools.Schema.Sql.SqlAzureV12DatabaseSchemaProvider</DSP>
+    <OutputType>Database</OutputType>
+    <RootPath />
+    <RootNamespace>ToolboxData</RootNamespace>
+    <AssemblyName>ToolboxData</AssemblyName>
+    <ModelCollation>1033, CI</ModelCollation>
+    <DefaultFileStructure>BySchemaAndSchemaType</DefaultFileStructure>
+    <DeployToDatabase>True</DeployToDatabase>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetLanguage>CS</TargetLanguage>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <SqlServerVerification>False</SqlServerVerification>
+    <IncludeCompositeObjects>True</IncludeCompositeObjects>
+    <TargetDatabaseSet>True</TargetDatabaseSet>
+    <DefaultFilegroup>PRIMARY</DefaultFilegroup>
+    <DbScopedConfigMaxDOP>1</DbScopedConfigMaxDOP>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>bin\Release\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>bin\Debug\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">11.0</VisualStudioVersion>
+    <SSDTExists Condition="Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets')">True</SSDTExists>
+    <VisualStudioVersion Condition="'$(SSDTExists)' == ''">11.0</VisualStudioVersion>
+  </PropertyGroup>
+  <Import Condition="'$(SQLDBExtensionsRefPath)' != ''" Project="$(SQLDBExtensionsRefPath)\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <Import Condition="'$(SQLDBExtensionsRefPath)' == ''" Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <ItemGroup>
+    <Folder Include="Properties" />
+    <Folder Include="dbo" />
+    <Folder Include="dbo\Stored Procedures" />
+    <Folder Include="dbo\Tables" />
+    <Folder Include="dbo\Views" />
+    <Folder Include="PublishLocations" />
+    <Folder Include="dbo\Types" />
+    <Folder Include="Security" />
+    <Folder Include="usr" />
+    <Folder Include="usr\Tables" />
+  </ItemGroup>
+  <ItemGroup>
+    <Build Include="dbo\Tables\Users.sql" />
+    <Build Include="dbo\Stored Procedures\spUserLookup.sql" />
+    <Build Include="dbo\Stored Procedures\spDatabases_GetAll.sql" />
+    <Build Include="dbo\Tables\Servers.sql" />
+    <Build Include="dbo\Tables\Databases.sql" />
+    <Build Include="dbo\Tables\Schemas.sql" />
+    <Build Include="dbo\Tables\Tables.sql" />
+    <Build Include="dbo\Stored Procedures\spSchemas_GetAll.sql" />
+    <Build Include="dbo\Stored Procedures\spSchemas_GetByDatabaseId.sql" />
+    <Build Include="dbo\Stored Procedures\spDatabases_GetByServerId.sql" />
+    <Build Include="dbo\Tables\Fields.sql" />
+    <Build Include="dbo\Stored Procedures\spTables_GetAll.sql" />
+    <Build Include="dbo\Stored Procedures\spTables_GetBySchemaId.sql" />
+    <Build Include="dbo\Stored Procedures\spFields_GetAll.sql" />
+    <Build Include="dbo\Stored Procedures\spFields_GetByTableId.sql" />
+    <Build Include="dbo\Stored Procedures\spServers_GetAll.sql" />
+    <Build Include="dbo\Stored Procedures\spDatabases_Insert.sql" />
+    <Build Include="dbo\Tables\UserPermissions.sql" />
+    <Build Include="dbo\Tables\Permissions.sql" />
+    <Build Include="dbo\Tables\DataTableLineage.sql" />
+    <Build Include="dbo\Stored Procedures\spDatabaseObjects_GetAll.sql" />
+    <Build Include="dbo\Stored Procedures\spDataTableLineage_Insert.sql" />
+    <Build Include="dbo\Stored Procedures\spDataTableLineage_Update.sql" />
+    <Build Include="dbo\Stored Procedures\spUserPermissions_GetByUserId.sql" />
+    <Build Include="dbo\Stored Procedures\spUserPermissions_Insert.sql" />
+    <Build Include="dbo\Stored Procedures\spUserPermissions_Update.sql" />
+    <Build Include="dbo\Stored Procedures\spDataTableLineage_GetAll.sql" />
+    <Build Include="dbo\Stored Procedures\spDataTableLineage_GetChildrenByTableId.sql" />
+    <Build Include="dbo\Stored Procedures\spDataTableLineage_GetParentsByTableId.sql" />
+    <Build Include="dbo\Stored Procedures\spServers_GetAllNonDev.sql" />
+    <Build Include="dbo\Stored Procedures\spDatabaseObjects_GetAllNonDev.sql" />
+    <Build Include="dbo\Stored Procedures\spUserPermissions_GetByManagerUserId.sql" />
+    <Build Include="dbo\Stored Procedures\spTables_GetByNames.sql" />
+    <Build Include="dbo\Tables\Scrapes.sql" />
+    <Build Include="dbo\Tables\ScrapeStatuses.sql" />
+    <Build Include="dbo\Stored Procedures\spScrapes_GetAll.sql" />
+    <Build Include="dbo\Stored Procedures\spScrapes_GetAllUnassigned.sql" />
+    <Build Include="dbo\Stored Procedures\spScrapes_GetById.sql" />
+    <Build Include="dbo\Tables\Indexes.sql" />
+    <Build Include="dbo\Tables\IndexFields.sql" />
+    <Build Include="dbo\Tables\ForeignKeys.sql" />
+    <Build Include="dbo\Tables\Constraints.sql" />
+    <Build Include="dbo\Stored Procedures\spForeignKeys_GetAll.sql" />
+    <Build Include="dbo\Stored Procedures\spIndexes_GetAll.sql" />
+    <Build Include="dbo\Stored Procedures\spConstraints_GetAll.sql" />
+    <Build Include="dbo\Stored Procedures\spIndexFields_GetAll.sql" />
+    <Build Include="dbo\Stored Procedures\spScrapes_Update.sql" />
+    <Build Include="dbo\Stored Procedures\spScrapes_DeleteAll.sql" />
+    <Build Include="dbo\Stored Procedures\spScrapes_Delete.sql" />
+    <Build Include="dbo\Stored Procedures\spScrapes_Insert.sql" />
+    <Build Include="dbo\Stored Procedures\spForeignKeys_GetByTableId.sql" />
+    <Build Include="dbo\Stored Procedures\spForeignKeys_Insert.sql" />
+    <Build Include="dbo\Stored Procedures\spForeignKeys_Update.sql" />
+    <Build Include="dbo\Stored Procedures\spConstraints_GetByTableId.sql" />
+    <Build Include="dbo\Stored Procedures\spConstraints_Insert.sql" />
+    <Build Include="dbo\Stored Procedures\spConstraints_Update.sql" />
+    <Build Include="dbo\Stored Procedures\spIndexes_GetByTableId.sql" />
+    <Build Include="dbo\Stored Procedures\spIndexes_Insert.sql" />
+    <Build Include="dbo\Stored Procedures\spIndexes_Update.sql" />
+    <Build Include="dbo\Stored Procedures\spIndexes_Delete.sql" />
+    <Build Include="dbo\Stored Procedures\spIndexes_DeleteByTableId.sql" />
+    <Build Include="dbo\Stored Procedures\spIndexFields_Insert.sql" />
+    <Build Include="dbo\Stored Procedures\spIndexFields_Delete.sql" />
+    <Build Include="dbo\Stored Procedures\spIndexFields_DeleteByIndexId.sql" />
+    <Build Include="dbo\Tables\ConstraintFields.sql" />
+    <Build Include="dbo\Stored Procedures\spConstraintFields_GetAll.sql" />
+    <Build Include="dbo\Stored Procedures\spConstraintFields_GetByConstraintId.sql" />
+    <Build Include="dbo\Stored Procedures\spConstraintFields_Insert.sql" />
+    <Build Include="dbo\Stored Procedures\spConstraintFields_Delete.sql" />
+    <Build Include="dbo\Stored Procedures\spConstraintFields_DeleteByConstraintId.sql" />
+    <Build Include="dbo\Stored Procedures\spConstraints_Delete.sql" />
+    <Build Include="dbo\Stored Procedures\spIndexFields_GetByIndexId.sql" />
+    <Build Include="dbo\Views\vwDatabaseObjects.sql" />
+    <Build Include="dbo\Stored Procedures\spDatabaseObjects_GetExactMatches.sql" />
+    <Build Include="dbo\Stored Procedures\spDatabaseObjects_GetPartialMatches.sql" />
+    <Build Include="dbo\Stored Procedures\spScrapes_GetAllDetailed.sql" />
+    <Build Include="dbo\Views\vwSuggestedScrapes.sql" />
+    <Build Include="dbo\Stored Procedures\spScrapes_GetSuggestedDetailed.sql" />
+    <Build Include="dbo\Stored Procedures\spScrapes_GetTopSuggestedDetailed.sql" />
+    <Build Include="dbo\Stored Procedures\spScrapes_GetSuggestionCount.sql" />
+    <Build Include="dbo\Stored Procedures\spServers_GetByServerId.sql" />
+    <Build Include="dbo\Types\DatabaseModelType.sql" />
+    <Build Include="dbo\Stored Procedures\spDatabases_Upsert.sql" />
+    <Build Include="dbo\Stored Procedures\spDatabases_GetDatabaseDetailsByDatabaseId.sql" />
+    <Build Include="dbo\Stored Procedures\spSchemas_GetSchemaDetailsBySchemaId.sql" />
+    <Build Include="dbo\Types\SchemaModelType.sql" />
+    <Build Include="dbo\Types\TableModelType.sql" />
+    <Build Include="dbo\Stored Procedures\spSchemas_Upsert.sql" />
+    <Build Include="dbo\Stored Procedures\spTables_Upsert.sql" />
+    <Build Include="dbo\Stored Procedures\spFields_Upsert.sql" />
+    <Build Include="dbo\Types\FieldModelType.sql" />
+    <Build Include="dbo\Stored Procedures\spTables_GetTableDetailsByTableId.sql" />
+    <Build Include="dbo\Stored Procedures\spScrapes_GetUnassignedScrapeCount.sql" />
+    <Build Include="dbo\Stored Procedures\spField_Update.sql" />
+    <Build Include="dbo\Stored Procedures\spFields_GetFieldDetailsByFieldId.sql" />
+    <Build Include="dbo\Stored Procedures\spFields_GetFieldIdByNames.sql" />
+    <Build Include="dbo\Types\IndexModelType.sql" />
+    <Build Include="dbo\Stored Procedures\spIndexes_Upsert.sql" />
+    <Build Include="dbo\Stored Procedures\spIndexFields_Upsert.sql" />
+    <Build Include="dbo\Types\IndexFieldModelType.sql" />
+    <Build Include="dbo\Stored Procedures\spConstraintFields_Upsert.sql" />
+    <Build Include="dbo\Types\ConstraintFieldModelType.sql" />
+    <Build Include="dbo\Stored Procedures\spConstraints_Upsert.sql" />
+    <Build Include="dbo\Types\ConstraintModelType.sql" />
+    <Build Include="dbo\Stored Procedures\spSchemas_GetIdByNames.sql" />
+    <Build Include="dbo\Stored Procedures\spForeignKeys_Upsert.sql" />
+    <Build Include="dbo\Types\ForeignKeyModelType.sql" />
+    <Build Include="Security\usr.sql" />
+    <Build Include="usr\Tables\UserLogins.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <RefactorLog Include="ToolboxData.refactorlog" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="PublishLocations\ToolboxData.publish.xml" />
+    <None Include="ToolboxData.publish.xml" />
+  </ItemGroup>
+</Project>

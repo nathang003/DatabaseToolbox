@@ -1,0 +1,460 @@
+﻿@page "/ScrapeQueue"
+
+@inject IScrapeEndpoint scrapeEndpoint;
+@inject IDisplayHelper displayHelper;
+@inject IToastService toastService;
+
+<h1>Scrape Queue</h1>
+
+<div class="scrape-refresh">
+    <button class="btn btn-primary" @onclick="RefreshAllScrapes">Refresh</button>     
+</div>
+
+<div>
+
+    <div class="scrapes-queued">
+
+        <div class="scrapes-pending">
+
+            <label>Pending Scrapes (@PendingScrapeCount)</label>
+
+            <select name="scrapesPending" class="form-control" size="10"
+                    @bind-value=SelectedPendingScrapeId
+                    @bind-value:event="onchange">
+
+                @if (ScrapesPending is not null)
+                {
+                    @foreach (ScrapeDetailedModel scrape in ScrapesPending.OrderBy(s => s.ScrapeScheduledDate))
+                    {
+                        <option value="@scrape.ScrapeId.ToString()" title="Name: @scrape.DynamicScrapeObjectName
+Scope: @scrape.ScrapeScope 
+Status: @scrape.ScrapeStatusName
+Scrape Object: @scrape.DynamicScrapeObject">@scrape.DynamicScrapeObjectName</option>
+                    }
+                }
+
+            </select>
+
+            <button class="btn btn-primary run-pending-scrape-btn" disabled="@IsRunNextPendingScrapeDisabled" @onclick="RunNextPendingScrape">Run Next Scrape</button>
+
+        </div>
+
+        <div class="scrapes-active">
+
+            <label>Active Scrapes (@ActiveScrapeCount)</label>
+
+            <select name="scrapesActive" class="form-control" size="10">
+
+                @if (ScrapesActive is not null)
+                {
+                    @foreach(ScrapeDetailedModel scrape in ScrapesActive.OrderByDescending(s => s.ScrapeScheduledDate))
+                    {
+                        <option value="@scrape.ScrapeId" title="Name: @scrape.DynamicScrapeObjectName
+Scope: @scrape.ScrapeScope 
+Status: @scrape.ScrapeStatusName 
+Scrape Object: @scrape.DynamicScrapeObject">@scrape.DynamicScrapeObjectName</option>
+                    }
+                }
+
+            </select>
+        </div>
+
+        <div class="scrapes-completed">
+
+            <label>Completed Scrapes (@displayHelper.AddNumericComma(CompletedScrapeCount))</label>
+
+            <select name="scrapesCompleted" class="form-control" size="10">
+
+                @if (ScrapesCompleted is not null)
+                {
+                    @foreach(ScrapeDetailedModel scrape in ScrapesCompleted.OrderByDescending(s => s.UpdatedDate))
+                    {
+                        <option value="@scrape.ScrapeId" title="Name: @scrape.DynamicScrapeObjectName
+Scope: @scrape.ScrapeScope 
+Status: @scrape.ScrapeStatusName 
+Scrape Object: @scrape.DynamicScrapeObject">@scrape.DynamicScrapeObjectName</option>
+                    }
+                }
+
+            </select>
+        </div>
+
+    </div>
+
+    <div class="scrapes-suggested">
+
+        <div class="scrape-suggestions">
+
+            <label>Suggested Scrapes (@SuggestedScrapeCount of @displayHelper.AddNumericComma(TotalSuggestedScrapeCount) total suggestions)</label>
+
+            <select name="scrapesSuggested" class="form-control" size="10">
+
+                @if (ScrapesSuggested is not null)
+                {
+                    @foreach(ScrapeSuggestionModel scrape in ScrapesSuggested.OrderBy(s => s.SuggestionRank))
+                    {
+                        <option value="@scrape.SuggestionRank" title="Scrape Scope: @scrape.ScrapeScope
+Scrape Object: @scrape.DynamicScrapeObject 
+Suggestion Reason: @SuggestionReason(scrape.ScrapePriorityLevel)">@scrape.DynamicScrapeObjectName</option>
+                    }
+                }
+
+            </select>
+        </div>
+    </div>
+
+</div>
+
+@code {
+    private List<ScrapeDetailedModel> scrapes;
+
+    protected async override Task OnInitializedAsync()
+    {
+        MyWorkerId = Guid.NewGuid();
+        Console.WriteLine(MyWorkerId);
+
+        await RefreshAllScrapes();
+    }
+
+    public int PendingScrapeCount = 0;
+    private List<ScrapeDetailedModel> scrapesPending;
+    public List<ScrapeDetailedModel> ScrapesPending
+    {
+        get => scrapesPending;
+        set
+        {
+            if( value is not null)
+            {
+                if (scrapesPending is null ||
+                    scrapesPending != value)
+                {
+                    scrapesPending = value;
+                    PendingScrapeCount = value.Count;
+                }
+            }
+        }
+    }
+
+    public int ActiveScrapeCount = 0;
+    private List<ScrapeDetailedModel> scrapesActive;
+    public List<ScrapeDetailedModel> ScrapesActive
+    {
+        get => scrapesActive;
+        set
+        {
+            if( value is not null)
+            {
+                if (scrapesActive is null ||
+                    scrapesActive != value)
+                {
+                    scrapesActive = value;
+                    ActiveScrapeCount = value.Count;
+                }
+            }
+        }
+    }
+
+    public int CompletedScrapeCount = 0;
+    private List<ScrapeDetailedModel> scrapesCompleted;
+    public List<ScrapeDetailedModel> ScrapesCompleted
+    {
+        get => scrapesCompleted;
+        set
+        {
+            if( value is not null)
+            {
+                if (scrapesCompleted is null ||
+                    scrapesCompleted != value)
+                {
+                    scrapesCompleted = value;
+                    CompletedScrapeCount = value.Count;
+                }
+            }
+        }
+    }
+
+    public int SuggestedScrapeCount = 0;
+    private List<ScrapeSuggestionModel> scrapesSuggested;
+    public List<ScrapeSuggestionModel> ScrapesSuggested
+    {
+        get => scrapesSuggested;
+        set
+        {
+            if( value is not null)
+            {
+                if (scrapesSuggested is null ||
+                    scrapesSuggested != value)
+                {
+                    scrapesSuggested = value;
+                    SuggestedScrapeCount = value.Count;
+                }
+            }
+        }
+    }
+
+    private int totalSuggestedScrapeCount = 0;
+    public int TotalSuggestedScrapeCount
+    {
+        get => totalSuggestedScrapeCount;
+        set
+        {
+            if (totalSuggestedScrapeCount != value)
+            {
+                totalSuggestedScrapeCount = value;
+            }
+        }
+    }
+
+    public async Task RefreshAllScrapes()
+    {
+        var TotalSuggestedScrapeCountTask = Task.Run(() => scrapeEndpoint.GetSuggestionCount());
+        var ScrapesSuggestedTask = Task.Run(() => scrapeEndpoint.GetTopSuggestedScrapes());
+
+        // Get scheduled scrapes whether or not they've been assigned
+        await RefreshScrapes();
+
+        // Get suggested scrapes        
+        TotalSuggestedScrapeCount = await TotalSuggestedScrapeCountTask;
+        ScrapesSuggested = await ScrapesSuggestedTask;
+
+        InvokeAsync(StateHasChanged);
+    }
+
+    public async Task RefreshScrapes()
+    {
+        // Get scheduled scrapes whether or not they've been assigned
+        scrapes = await scrapeEndpoint.GetAllScrapesDetailed();
+
+        ScrapesPending = scrapes.Where(s => s.ScrapeStatusId == (int)ScrapeStatus.Scheduled).ToList();
+        ScrapesActive = scrapes.Where(s => s.ScrapeStatusId == (int)ScrapeStatus.Assigned || s.ScrapeStatusId == (int)ScrapeStatus.Executing).ToList();
+        ScrapesCompleted = scrapes.Where(s => s.ScrapeStatusId == (int)ScrapeStatus.Completed || s.ScrapeStatusId == (int)ScrapeStatus.Failed).ToList();
+        InvokeAsync(StateHasChanged);
+    }
+
+    private string _selectedPendingScrapeId;
+    [Parameter]
+    public string SelectedPendingScrapeId
+    {
+        get => _selectedPendingScrapeId;
+        set
+        {
+            if (this._selectedPendingScrapeId != value)
+            {
+                this._selectedPendingScrapeId = value;
+
+                ScrapeDetailedModel scrape = ScrapesPending.Where(s => s.ScrapeId.ToString() == value).FirstOrDefault();
+                if (scrape is not null)
+                {
+                    IsRunNextPendingScrapeDisabled = false;   
+                }
+                else
+                {
+                    IsRunNextPendingScrapeDisabled = true;
+                }
+            }
+        }
+    }
+
+    private string _selectedActiveScrapeId;
+    [Parameter]
+    public string SelectedActiveScrapeId
+    {
+        get => _selectedActiveScrapeId;
+        set
+        {
+            if (this._selectedActiveScrapeId != value)
+            {
+                this._selectedActiveScrapeId = value;
+            }
+        }
+    }
+
+    private string _selectedCompletedScrapeId;
+    [Parameter]
+    public string SelectedCompletedScrapeId
+    {
+        get => _selectedCompletedScrapeId;
+        set
+        {
+            if (this._selectedCompletedScrapeId != value)
+            {
+                this._selectedCompletedScrapeId = value;
+            }
+        }
+    }
+
+    private bool _isRunNextPendingScrapeDisabled;
+    [Parameter]
+    public bool IsRunNextPendingScrapeDisabled
+    {
+        get => _isRunNextPendingScrapeDisabled;
+        set
+        {
+            if (this._isRunNextPendingScrapeDisabled != value)
+            {
+                this._isRunNextPendingScrapeDisabled = value;
+            }
+        }
+    }
+
+    public async Task RunNextPendingScrape()
+    {
+        Console.WriteLine("Entering ScrapeQueue.RunNextPendingScrape()");
+
+        ScrapeDetailedModel scrape = ScrapesPending.Where(s => s.ScrapeId.ToString() == SelectedPendingScrapeId).FirstOrDefault();
+        if(scrape is not null)
+        {
+            await UpdateScrape(scrape, ScrapeStatus.Assigned);
+
+            await UpdateScrape(scrape, ScrapeStatus.Executing);
+
+            try
+            {
+                if(await ExecuteScrape(scrape))
+                {
+                    await UpdateScrape(scrape, ScrapeStatus.Completed);
+                    toastService.ShowSuccess($"Finished scrape: {scrape.DynamicScrapeObjectName}");
+                }
+                else
+                {
+                    await UpdateScrape(scrape, ScrapeStatus.Failed);
+                    toastService.ShowError($"Scrape Failed: {scrape.DynamicScrapeObjectName}");
+                }
+            }
+            catch
+            {
+                await UpdateScrape(scrape, ScrapeStatus.Failed);
+                toastService.ShowError($"Scrape Failed: {scrape.DynamicScrapeObjectName}");
+            }
+
+            RefreshAllScrapes();
+            Console.WriteLine("Finished running scrape.");
+
+        }
+    }
+
+    public async Task UpdateScrape(ScrapeDetailedModel scrape, ScrapeStatus status)
+    {
+        ScrapeDetailedModel persistedScrape = scrapes.First(s => s.ScrapeId == scrape.ScrapeId);
+
+        if (status.ToString() == "Assigned")
+        {
+            persistedScrape.ScrapeWorkerId = MyWorkerId;
+            scrape.ScrapeWorkerId = MyWorkerId;
+        }
+
+        persistedScrape.ScrapeStatusId = (int)status;
+        persistedScrape.ScrapeStatusName = status.ToString();
+
+        scrape.ScrapeStatusId = (int)status;
+        scrape.ScrapeStatusName = status.ToString();
+
+        await scrapeEndpoint.UpdateScrape(scrape);
+        RefreshScrapes();
+    }
+
+    public enum ScrapeStatus : int
+    {
+        Scheduled = 2,
+        Assigned = 3,
+        Executing = 4,
+        Completed = 5,
+        Failed = 6
+    }
+
+    private Guid _myWorkerId = Guid.NewGuid();
+    public Guid MyWorkerId
+    {
+        get => _myWorkerId;
+        set
+        {
+            value = MyWorkerId;
+        }
+    }
+
+    private List<ScrapeDetailedModel> _myScrapes;
+    public List<ScrapeDetailedModel> MyScrapes
+    {
+        get => _myScrapes;
+        set
+        {
+            if(value is not null
+                && value.Count > 0)
+            {
+                if(value != _myScrapes)
+                {
+                    _myScrapes = value;
+                }
+            }
+        }
+    }
+
+    public string SuggestionReason(int scrapePriorityLevel)
+    {
+        switch (scrapePriorityLevel)
+        {
+            case 1:
+                return "Server info missing - No databases identified.";
+            case 2:
+                return "Database info missing - No schemas identified.";
+            case 3:
+                return "Schema info missing - No tables identified.";
+            case 4:
+                return "Table info missing - No fields identified.";
+            case 5:
+                return "Field info missing - No sample values identified.";
+            case 6:
+                return "Index info missing - No indexes identified.";
+            case 7:
+                return "Foreign Key info missing - No foreign keys identified.";
+            case 8:
+                return "Constraint info missing - No constraints identified.";
+            case 9:
+                return "Server info outdated - over 90 days since previous scrape.";
+            case 10:
+                return "Database info outdated - over 90 days since previous scrape.";
+            case 11:
+                return "Schema info outdated - over 90 days since previous scrape.";
+            case 12:
+                return "Table info outdated - over 90 days since previous scrape.";
+            case 13:
+                return "Field info outdated - over 90 days since previous scrape.";
+            case 14:
+                return "Index info outdated - over 90 days since previous scrape.";
+            case 15:
+                return "Foreign Key info outdated - over 90 days since previous scrape.";
+            case 16:
+                return "Constraint info outdated - over 90 days since previous scrape.";
+            default:
+                return "N/A";
+        }
+    }
+
+    public async Task<bool> ExecuteScrape(ScrapeDetailedModel scrape)
+    {
+        Console.WriteLine("Entering ScrapeQueue.ExecuteScrape(ScrapeDetailedModel scrape)");
+        switch(scrape.ScrapeScope)
+        {
+            case "Server":
+                return await scrapeEndpoint.ExecuteServerScrape(scrape);
+            case "Database":
+                return await scrapeEndpoint.ExecuteDatabaseScrape(scrape);
+            case "Schema":
+                return await scrapeEndpoint.ExecuteSchemaScrape(scrape);
+            case "Table":
+                return await scrapeEndpoint.ExecuteTableScrape(scrape);
+            case "Field":
+                return await scrapeEndpoint.ExecuteFieldScrape(scrape);
+            case "Index":
+                return await scrapeEndpoint.ExecuteIndexScrape(scrape);
+            case "Constraint":
+                return await scrapeEndpoint.ExecuteConstraintScrape(scrape);
+            case "ForeignKey":
+                return await scrapeEndpoint.ExecuteForeignKeyScrape(scrape);
+            default:
+                Console.WriteLine("ScrapeQueue.ExecuteScrape(ScrapeDetailedMode scrape): NotImplementedException()");
+                //throw new NotImplementedException();
+                return false;
+        }
+    }
+}

@@ -1,0 +1,9 @@
+﻿namespace ToolboxWebApiLibrary.DataAccess
+{
+    public interface IDatabaseObjectData
+    {
+        Task<List<DatabaseObjectModel>> GetAllDatabaseObjects();
+        Task<List<DatabaseObjectModel>> GetExactMatches(string searchValue);
+        Task<List<DatabaseObjectModel>> GetPartialMatches(string searchValue);
+    }
+}

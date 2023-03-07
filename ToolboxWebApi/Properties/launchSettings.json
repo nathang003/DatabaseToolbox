@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json.schemastore.org/launchsettings.json",
+  "iisSettings": {
+    "windowsAuthentication": false,
+    "anonymousAuthentication": true,
+    "iisExpress": {
+      "applicationUrl": "http://localhost:60032/",
+      "sslPort": 44325
+    }
+  },
+  "profiles": {
+    "ToolboxWebApi": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "launchUrl": "swagger",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "AZURE_USERNAME": "ngallagher@mynexuscare.com",
+        "VaultUri": "https://kv-edw-resources-prod.vault.azure.net/"
+      },
+      "applicationUrl": "https://localhost:7087;http://localhost:5087",
+      "dotnetRunMessages": true
+    },
+    "IIS Express": {
+      "commandName": "IISExpress",
+      "launchBrowser": true,
+      "launchUrl": "swagger",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "AZURE_USERNAME": "ngallagher@mynexuscare.com",
+        "VaultUri": "https://kv-edw-resources-prod.vault.azure.net/"
+      }
+    }
+  }
+}

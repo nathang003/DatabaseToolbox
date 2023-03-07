@@ -1,0 +1,13 @@
+﻿CREATE TABLE [dbo].[Schemas]
+(
+	[SchemaId] INT NOT NULL PRIMARY KEY IDENTITY, 
+    [ServerId] INT NOT NULL, 
+    [DatabaseId] INT NOT NULL, 
+    [SchemaName] NVARCHAR(50) NOT NULL, 
+    [Purpose] NVARCHAR(MAX) NULL,
+    [RemovalDate] DATETIME2(7) NULL,
+    [CreatedDate] DATETIME2 NOT NULL DEFAULT GETUTCDATE(), 
+    [CreatedBy] NVARCHAR(50) NOT NULL DEFAULT SUSER_SNAME(), 
+    [UpdatedDate] DATETIME2 NOT NULL DEFAULT GETUTCDATE(), 
+    [UpdatedBy] NVARCHAR(50) NOT NULL DEFAULT SUSER_SNAME()
+)

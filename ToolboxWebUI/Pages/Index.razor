@@ -1,0 +1,46 @@
+﻿@page "/"
+
+@using System.Text.Json;
+@using System.Net.Http.Headers;
+@using ToolboxWebUI.Data;
+@inject IHttpClientFactory Factory
+@inject TokenProvider TokenProvider
+
+<PageTitle>Index</PageTitle>
+
+<h1>Welcome!</h1>
+
+<p>This is the Toolbox; a source of tools developed in-house and designed to meet specific business needs. 
+    Currently, there are three main tools in the Toolbox: <em>Data Architecture</em>, <em>Scrape Queue</em>, and <em>Terms & Definitions</em>.
+</p>
+
+<h3><NavLink class="nav-link" href="dataarchitecture">Data Architecture</NavLink></h3>
+<p> The <em>Data Architecture</em> tool was created out of a need for the Med Econ team to understand data lineage (or 
+    where the data comes from). The Data Warehouse has changed owners multiple times since myNexus' beginnings
+    which has also left a gap in documentation. This tool seeks to provide context for data in the Data Warehouse
+    and map out its lineage in a simple intuitive interface.
+</p>
+
+<h3><NavLink class="nav-link" href="scrapequeue">Scrape Queue</NavLink></h3>
+<p>
+    The <em>Scrape Queue</em> tool handles displaying and executing scrapes against data objects. A scrape is a background process that looks for
+    specific information about its target data object. A server scrape would look for databases on that server; a schema scrape looks for tables 
+    within that schema, and so on.
+</p>
+
+<h3><NavLink class="nav-link" href="TermsAndDefinitions">Terms & Definitions</NavLink></h3>
+<p> myNexus uses a slew of acronyms, abbreviations, terms, and shorthand to represent a wide variety of ideas, 
+    programs, and concepts. The <em>Terms & Definitions</em> tool lists and defines many of the terms 
+    used on a day to day basis.
+</p>
+
+<UserClaims/>
+
+@code{
+    public string UserId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+    }
+}

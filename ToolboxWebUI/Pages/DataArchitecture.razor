@@ -1,0 +1,2270 @@
+﻿@page "/DataArchitecture"
+
+@using Blazor.Diagrams.Core.Geometry
+@using ToolboxWebLibrary.Internal.DataAccess;
+@using ToolboxWebUI.Components;
+
+@using Blazor.Diagrams.Core;
+@using Blazor.Diagrams.Core.Models;
+@using Blazor.Diagrams.Core.Models.Base;
+@using Blazor.Diagrams.Components;
+
+@inject IServerEndpoint serverEndpoint
+@inject IDatabaseEndpoint databaseEndpoint
+@inject ISchemaEndpoint schemaEndpoint
+@inject ITableEndpoint tableEndpoint
+@inject IFieldEndpoint fieldEndpoint
+@inject IForeignKeyEndpoint foreignKeyEndpoint
+@inject IIndexEndpoint indexEndpoint
+@inject IConstraintEndpoint constraintEndpoint
+@inject IDatabaseObjectEndpoint databaseObjectEndpoint
+@inject IScrapeEndpoint scrapeEndpoint
+@inject IDataTableLineageEndpoint dataTableLineageEndpoint
+
+@inject IJSRuntime js
+@inject IToastService toastService
+
+
+<h1>Data Architecture</h1>
+
+<div>
+    <div>
+        <div class="data-architecture-search-bar">
+
+            <ToolboxWebUI.Pages.Components.ToggleGroup GroupInfo="@group"></ToolboxWebUI.Pages.Components.ToggleGroup>
+
+            <input class="form-control searchbox"
+                @bind-value="SearchText" 
+                @bind-value:event="oninput"
+                placeholder="Search data objects by name" />
+        </div>
+
+        @if (searchResults.Any())
+        {
+            <select class="form-control search-results" size="10"
+                @bind-value=SelectedSearchResult
+                @bind-value:event="onchange">
+                @foreach(var searchResult in searchResults)
+                {
+                    <option value="@searchResult.DatabaseObjectType-@searchResult.DatabaseObjectId">@searchResult.DatabaseFullAddress</option>
+                }
+            </select>
+        }
+    </div>
+    <div class="data-architecture-top-row">
+        <div class="data-object-lists">
+            <div class="server-data-objects">
+                <label>Servers</label>
+                <select name="servers" class="form-control server-form" size="10"
+                    @bind-value=SelectedServerId
+                    @bind-value:event="onchange">
+                    @if(servers is not null && servers.Count> 0)
+                    {
+                        foreach(var s in servers)
+                        {
+                            <option value="@s.ServerId" title="@s.ServerName">@s.ServerName</option>
+                        }
+                    }
+                </select>
+                
+                <div class="data-object-buttons">
+                    <button class="btn btn-primary scrape-buttons" disabled="@IsQueueServerScrapeDisabled" @onclick="QueueServerScrape">Scrape for Databases</button>
+                </div>
+
+                <table class="server-properties-table">
+                    <tr>
+                        <td>Id</td>
+                        <td>@SelectedServerId</td>
+                    </tr>
+                    <tr>
+                        <td>Name</td>
+                        <td>@SelectedServerName</td>
+                    </tr>
+                    <tr>
+                        <td>Purpose</td>
+                        <td>@SelectedServerPurpose</td>
+                    </tr>
+                    <tr>
+                        <td>For Development</td>
+                        <td>@SelectedServerIsDevelopmentServer</td>
+                    </tr>
+                    <tr>
+                        <td>Updated Date</td>
+                        <td>@SelectedServerUpdatedDate</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="database-data-objects">
+                <label>Databases</label>
+                <select name="databases" class="form-control database-form" size="10"
+                    @bind-value=SelectedDatabaseId
+                    @bind-value:event="onchange">
+                    @if(databases is not null && databases.Count > 0)
+                    {
+                        foreach(var d in databases.Where(d => d.ServerId.ToString().Equals(SelectedServerId)
+                            && d.RemovalDate < @FilterDate))
+                        {
+                            @if(d.ServerId.ToString().Equals(SelectedServerId))
+                            {                                
+                                <option value="@d.DatabaseId" title="@d.DatabaseName">@d.DatabaseName</option>
+                            }
+                        }
+                    }
+                </select>        
+
+                <div class="data-object-buttons">
+                    <button class="btn btn-primary scrape-buttons" disabled="@IsQueueDatabaseScrapeDisabled" @onclick="QueueDatabaseScrape">Scrape for Schemas</button>
+                </div>        
+
+                <table class="database-properties-table">
+                    <tr>
+                        <td>Id</td>
+                        <td>@SelectedDatabaseId</td>
+                    </tr>
+                    <tr>
+                        <td>Name</td>
+                        <td>@SelectedDatabaseName</td>
+                    </tr>
+                    <tr>
+                        <td>Purpose</td>
+                        <td>@SelectedDatabasePurpose</td>
+                    </tr>
+                    @if(SelectedDatabaseRemovalDate != "1/1/0001 12:00:00 AM")
+                    {
+                        <tr>
+                            <td>Removal Date</td>
+                            <td>@SelectedDatabaseRemovalDate</td>
+                        </tr>
+                    }
+                    <tr>
+                        <td>Updated Date</td>
+                        <td>@SelectedDatabaseUpdatedDate</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="schema-data-objects">
+                <label>Schemas</label>
+                <select name="schemas" class="form-control schema-form" size="10"
+                    @bind-value=SelectedSchemaId
+                    @bind-value:event="onchange">
+                    @if(schemas is not null && schemas.Count > 0)
+                    {
+                        foreach(var sc in schemas)
+                        {
+                            @if(sc.DatabaseId.ToString().Equals(SelectedDatabaseId))
+                            {
+                                <option value="@sc.SchemaId" title="@sc.SchemaName">@sc.SchemaName</option>                                
+                            }
+                        }
+                    }
+                </select>
+                
+                <div class="data-object-buttons">
+                    <button class="btn btn-primary scrape-buttons" disabled="@IsQueueSchemaScrapeDisabled" @onclick="QueueSchemaScrape">Scrape for Tables</button>
+                </div>
+
+                <table class="schema-properties-table">
+                    <tr>
+                        <td>Id</td>
+                        <td>@SelectedSchemaId</td>
+                    </tr>
+                    <tr>
+                        <td>Name</td>
+                        <td>@SelectedSchemaName</td>
+                    </tr>
+                    <tr>
+                        <td>Purpose</td>
+                        <td>@SelectedSchemaPurpose</td>
+                    </tr>
+                    <tr>
+                        <td>Updated Date</td>
+                        <td>@SelectedSchemaUpdatedDate</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="table-data-objects">
+                <label>Tables</label>
+                <select name="tables" class="form-control table-form" size="10"
+                    @bind-value=SelectedTableId
+                    @bind-value:event="onchange">
+                    @if(tables is not null && tables.Count > 0)
+                    {
+                        foreach(var t in tables)
+                        {
+                            @if(t.SchemaId.ToString().Equals(SelectedSchemaId))
+                            {                               
+                                <option value="@t.TableId" title="@t.TableName">@t.TableName</option> 
+                            }
+                        }
+                    }
+                </select>
+                
+                <div class="table-object-buttons">
+                    <button class="btn btn-primary scrape-buttons" disabled="@IsQueueTableScrapeDisabled" @onclick="QueueTableScrape">Fields</button>
+                    <button class="btn btn-primary scrape-buttons" disabled="@IsQueueIndexScrapeDisabled" @onclick="QueueIndexScrape">Indexes</button>
+                    <button class="btn btn-primary scrape-buttons" disabled="@IsQueueForeignKeyScrapeDisabled" @onclick="QueueForeignKeyScrape">Foreign Keys</button>
+                    <button class="btn btn-primary scrape-buttons" disabled="@IsQueueConstraintScrapeDisabled" @onclick="QueueConstraintScrape">Constraints</button>
+                </div>
+
+                <table class="table-properties-table">
+                    <tr>
+                        <td>Id</td>
+                        <td>@SelectedTableId</td>
+                    </tr>
+                    <tr>
+                        <td>Name</td>
+                        <td>@SelectedTableName</td>
+                    </tr>
+                    <tr>
+                        <td>Purpose</td>
+                        <td>@SelectedTablePurpose</td>
+                    </tr>
+                    <tr>
+                        <td>Updated Date</td>
+                        <td>@SelectedTableUpdatedDate</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="field-data-objects">
+                <label>Fields</label>
+                <select name="fields" class="form-control field-form" size="10"
+                    @bind-value=SelectedFieldId
+                    @bind-value:event="onchange">
+                    @if(fields is not null && fields.Count > 0)
+                    {
+                        foreach(var f in fields)
+                        {
+                            @if(f.TableId.ToString().Equals(SelectedTableId))
+                            {                               
+                                <option value="@f.FieldId" title="@f.FieldName">@f.FieldName</option>
+                            }
+                        }
+                    }
+                </select>
+                
+                <div class="data-object-buttons">
+                    <button class="btn btn-primary scrape-buttons" disabled="@IsQueueFieldScrapeDisabled" @onclick="QueueFieldScrape">Scrape for Values</button>
+                </div>
+
+                <table class="field-properties-table form-control">
+                    <tr>
+                        <td>Id</td>
+                        <td>@SelectedFieldId</td>
+                    </tr>
+                    <tr>
+                        <td>Name</td>
+                        <td>@SelectedFieldName</td>
+                    </tr>
+                    <tr>
+                        <td>Purpose</td>
+                        <td>@SelectedFieldPurpose</td>
+                    </tr>
+                    <tr>
+                        <td>Nullability</td>
+                        <td>@SelectedFieldNullability</td>
+                    </tr>
+                    <tr>
+                        <td>Data Type</td>
+                        <td>@SelectedFieldDataType</td>
+                    </tr>
+                    <tr>
+                        <td>Ordinal Number</td>
+                        <td>@SelectedFieldOrdinalNumber</td>
+                    </tr>
+                    <tr>
+                        <td>Default Value</td>
+                        <td>@SelectedFieldDefaultValue</td>
+                    </tr>
+                    <tr>
+                        <td>Character Length</td>
+                        <td>@SelectedFieldCharacterLength</td>
+                    </tr>
+                    <tr>
+                        <td>Numeric Precision</td>
+                        <td>@SelectedFieldNumericPrecision</td>
+                    </tr>
+                    <tr>
+                        <td>Numeric Scale</td>
+                        <td>@SelectedFieldNumericScale</td>
+                    </tr>
+                    <tr>
+                        <td>DateTime Precision</td>
+                        <td>@SelectedFieldDateTimePrecision</td>
+                    </tr>
+                    <tr>
+                        <td>Character Set Name</td>
+                        <td>@SelectedFieldCharacterSetName</td>
+                    </tr>
+                    <tr>
+                        <td>Collation Name</td>
+                        <td>@SelectedFieldCollationName</td>
+                    </tr>
+                    <tr>
+                        <td>Updated Date</td>
+                        <td>@SelectedFieldUpdatedDate</td>
+                    </tr>
+                    <tr>
+                        <td>Min Value</td>
+                        <td>@SelectedFieldMinValue</td>
+                    </tr>
+                    <tr>
+                        <td>Max Value</td>
+                        <td>@SelectedFieldMaxValue</td>
+                    </tr>
+                    <tr>
+                        <td>Sample Value 1</td>
+                        <td>@SelectedFieldSampleValue1</td>
+                    </tr>
+                    <tr>
+                        <td>Sample Value 2</td>
+                        <td>@SelectedFieldSampleValue2</td>
+                    </tr>
+                    <tr>
+                        <td>Sample Value 3</td>
+                        <td>@SelectedFieldSampleValue3</td>
+                    </tr>
+                    <tr>
+                        <td>Sample Value 4</td>
+                        <td>@SelectedFieldSampleValue4</td>
+                    </tr>
+                    <tr>
+                        <td>Sample Value 5</td>
+                        <td>@SelectedFieldSampleValue5</td>
+                    </tr>
+                    <tr>
+                        <td>Sample Value 6</td>
+                        <td>@SelectedFieldSampleValue6</td>
+                    </tr>
+                    <tr>
+                        <td>Sample Value 7</td>
+                        <td>@SelectedFieldSampleValue7</td>
+                    </tr>
+                    <tr>
+                        <td>Sample Value 8</td>
+                        <td>@SelectedFieldSampleValue8</td>
+                    </tr>
+                    <tr>
+                        <td>Sample Value 9</td>
+                        <td>@SelectedFieldSampleValue9</td>
+                    </tr>
+                    <tr>
+                        <td>Sample Value 10</td>
+                        <td>@SelectedFieldSampleValue10</td>
+                    </tr>
+                    <tr>
+                        <td>Null Percentage</td>
+                        <td>@SelectedFieldNullPercentage</td>
+                    </tr>
+                </table>    
+            </div>
+        </div>
+    </div>
+
+
+    <div class="data-architecture-keys-row">
+        <div class="data-object-keys">
+            <div class="key-data-objects">
+                <label>Foreign Keys</label>
+                <select name="foreignKeys" class="form-control foreign-keys-form" size="3"
+                    @bind-value=SelectedForeignKeyId
+                    @bind-value:event="onchange">
+                    @if(foreignKeys is not null && foreignKeys.Count > 0)
+                    {
+                        foreach(var k in foreignKeys)
+                        {
+                            @if(k.TableId.ToString().Equals(SelectedTableId))
+                            {
+                                <option value="@k.ForeignKeyId" title="Name: @k.ForeignKeyName
+Constraint Table: @k.ConstraintTable
+Constraint Field: @k.ConstraintField
+Reference Table: @k.ReferencedTable
+Reference Field: @k.ReferencedField
+Update Action: @k.UpdateReferentialActionDescription
+Delete Action: @k.DeleteReferentialActionDescription
+Is Not Trusted: @k.IsNotTrusted
+Is Disabled: @k.IsDisabled">@k.ForeignKeyName</option>
+                            }
+                        }
+                    }
+                </select>
+                
+                <div class="data-object-buttons">
+                    <button class="btn btn-primary scrape-buttons" disabled="@IsQueueForeignKeyScrapeDisabled" @onclick="QueueForeignKeyScrape">Scrape for Foreign Keys</button>
+                </div>
+            </div>
+            <div class="index-data-objects">
+                <label>Indexes</label>
+                <select name="indexes" class="form-control indexes-form" size="3"
+                    @bind-value=SelectedIndexId
+                    @bind-value:event="onchange">
+                    @if(indexes is not null && indexes.Count > 0)
+                    {
+                        foreach(var i in indexes)
+                        {
+                            @if(i.TableId.ToString().Equals(SelectedTableId))
+                            {
+                                <option value="@i.IndexId" title="Name: @i.IndexName
+Type: @i.IndexType
+Is Unique: @i.IsUnique">@i.IndexName</option>
+                            }
+                        }
+                    }
+                </select>
+                
+                <div class="data-object-buttons">
+                    <button class="btn btn-primary scrape-buttons" disabled="@IsQueueIndexScrapeDisabled" @onclick="QueueIndexScrape">Scrape for Indexes</button>
+                </div>
+            </div>
+            <div class="constraint-data-objects">
+                <label>Constraints</label>
+                <select name="constraints" class="form-control constraints-form" size="3"
+                    @bind-value=SelectedConstraintId
+                    @bind-value:event="onchange">
+                    @if(constraints is not null && constraints.Count > 0)
+                    {
+                        foreach(var c in constraints)
+                        {
+                            @if(c.TableId.ToString().Equals(SelectedTableId))
+                            {                                
+                                <option value="@c.ConstraintId">@c.ConstraintName</option>
+                            }
+                        }
+                    }
+                </select>
+                
+                <div class="data-object-buttons">
+                    <button class="btn btn-primary scrape-buttons" disabled="@IsQueueConstraintScrapeDisabled" @onclick="QueueConstraintScrape">Scrape for Constraints</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="data-architecture-bottom-row">
+        <div>
+            <label>UML Mapping</label>
+            <button class="btn btn-primary" @onclick="NavigateToUmlOrigin">Back to Origin</button>
+        </div>
+        <div class="uml-holder">
+            <CascadingValue Value="diagram">
+                <div class="uml-mapping">
+                    <DiagramCanvas></DiagramCanvas>
+                </div>
+            </CascadingValue>
+        </div>
+        <div class="data-object-appearances">
+
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<ServerModel> servers;
+    private List<DatabaseModel> databases;    
+    private List<SchemaModel> schemas;
+    private List<TableModel> tables;
+    private List<FieldModel> fields;
+    private List<ForeignKeyModel> foreignKeys;
+    private List<IndexModel> indexes;
+    private List<ConstraintModel> constraints;
+    private List<DatabaseObjectModel> databaseObjects;
+    private List<DataTableLineageModel> dataTableLineages; 
+    private DateTime FilterDate = DateTime.Parse("2017 Jan 01");
+
+    Data.ToggleGroupInfoData group = new Data.ToggleGroupInfoData()
+        {
+            Options = new string[] { "Partial Match", "Exact Match" }
+        };
+
+    public Diagram diagram { get; private set; } = new Diagram(new DiagramOptions
+        {
+            AllowPanning = true,
+            GridSize = 40,
+            AllowMultiSelection = false,
+            DefaultNodeComponent = null,
+            Links = new DiagramLinkOptions
+            {
+                // TODO: Add function to handle links
+            },
+            Zoom = new DiagramZoomOptions
+            {
+                Enabled = false,
+                Minimum = 0.5, // Minimum zoom value
+                Inverse = false, //Whether to inverse the direction of the zoom when using the wheel
+                Maximum = 1
+            }
+        });
+
+    protected async override Task OnInitializedAsync()
+    {
+        var serverResults = Task.Run(() => serverEndpoint.GetAllServers());
+        var databaseResults = Task.Run(() => databaseEndpoint.GetAllDatabases());
+        var schemaResults = Task.Run(() => schemaEndpoint.GetAllSchemas());
+        var tableResults = Task.Run(() => tableEndpoint.GetAllTables());
+        var fieldResults = Task.Run(() => fieldEndpoint.GetAllFields());
+        var foreignKeyResults = Task.Run(() => foreignKeyEndpoint.GetAllForeignKeys());
+        var indexResults = Task.Run(() => indexEndpoint.GetAllIndexes());
+        var constraintResults = Task.Run(() => constraintEndpoint.GetAllConstraints());
+        var databaseObjectResults = Task.Run(() => databaseObjectEndpoint.GetAllDatabaseObjects());
+        var dataTableLineageResults = Task.Run(() => dataTableLineageEndpoint.GetAllDataTableLineages());
+
+        servers = await serverResults;
+        databases = await databaseResults;
+        schemas = await schemaResults;
+        tables = await tableResults;
+        fields = await fieldResults;
+        foreignKeys = await foreignKeyResults;
+        indexes = await indexResults;
+        constraints = await constraintResults;
+        databaseObjects = await databaseObjectResults;
+        dataTableLineages = await dataTableLineageResults;
+
+        IsQueueServerScrapeDisabled = true;
+        IsQueueDatabaseScrapeDisabled = true;
+        IsQueueSchemaScrapeDisabled = true;
+        IsQueueTableScrapeDisabled = true;
+        IsQueueFieldScrapeDisabled = true;
+        IsQueueForeignKeyScrapeDisabled = true;
+        IsQueueIndexScrapeDisabled = true;
+        IsQueueConstraintScrapeDisabled = true;
+
+        group.PropertyChanged += Status_PropertyChanged;
+
+        diagram.RegisterModelComponent<Table, TableNode>();
+        diagram.Links.Added += OnLinkAdded;
+        diagram.Links.Removed += Diagram_LinkRemoved;
+        diagram.Locked = true;
+    }
+
+
+    #region Server Data
+
+    private ServerModel selectedServer;
+    public ServerModel SelectedServer
+    {
+        get => selectedServer;
+        set
+        {
+            if (value != null)
+            {
+                if (selectedServer is null ||
+                    value.ServerId != selectedServer?.ServerId)
+                {
+                    selectedServer = value;
+                }
+            }
+        }
+    }
+
+    private string selectedServerId;
+    [Parameter]
+    public string SelectedServerId
+    {
+        get => selectedServerId;
+        set
+        {
+            if (value != "")
+            {
+                if (this.selectedServerId != value)
+                {
+                    this.selectedServerId = value;
+                    //SelectedServerChanged.InvokeAsync(value);
+                    SelectedDatabaseId = string.Empty;
+
+                    SelectedServer = servers.Where(s => s.ServerId.ToString() == value).FirstOrDefault();
+                    SelectedServerName = SelectedServer.ServerName ?? string.Empty;
+                    SelectedServerPurpose = SelectedServer.Purpose ?? string.Empty;
+                    SelectedServerIsDevelopmentServer = SelectedServer.IsDevelopmentServer == 1 ? "Yes" : "No" ?? "?";
+                    SelectedServerUpdatedDate = SelectedServer.UpdatedDate.ToString() ?? string.Empty;
+                }
+            }
+
+            if (int.Parse(this.selectedServerId) > -1 && 
+                value != "")
+            {
+                IsQueueServerScrapeDisabled = false;
+            }
+            else
+            {
+                IsQueueServerScrapeDisabled = true;
+            }
+        }
+    }
+
+    private string selectedServerName;
+    [Parameter]
+    public string SelectedServerName
+    {
+        get => selectedServerName;
+        set
+        {
+            if (this.selectedServerName != value)
+            {
+                this.selectedServerName = value;
+            }
+        }
+    }
+
+    private string selectedServerPurpose;
+    [Parameter]
+    public string SelectedServerPurpose
+    {
+        get => selectedServerPurpose;
+        set
+        {
+            if (this.selectedServerPurpose != value)
+            {
+                this.selectedServerPurpose = value;
+            }
+        }
+    }
+
+    private string selectedServerIsDevelopmentServer;
+    [Parameter]
+    public string SelectedServerIsDevelopmentServer
+    {
+        get => selectedServerIsDevelopmentServer;
+        set
+        {
+            if (this.selectedServerIsDevelopmentServer != value)
+            {
+                this.selectedServerIsDevelopmentServer = value;
+            }
+        }
+    }
+
+    private string selectedServerUpdatedDate;
+    [Parameter]
+    public string SelectedServerUpdatedDate
+    {
+        get => selectedServerUpdatedDate;
+        set
+        {
+            if (this.selectedServerUpdatedDate != value)
+            {
+                this.selectedServerUpdatedDate = value;
+            }
+        }
+    }
+
+    #endregion
+
+    #region Database Data
+
+    private DatabaseModel selectedDatabase;
+    public DatabaseModel SelectedDatabase
+    {
+        get => selectedDatabase;
+        set
+        {
+            if (value != null)
+            {
+                if (selectedDatabase is null ||
+                    value.DatabaseId != selectedDatabase?.DatabaseId)
+                {
+                    selectedDatabase = value;
+                }
+            }
+        }
+    }
+
+    private string selectedDatabaseId;
+    [Parameter]
+    public string SelectedDatabaseId 
+    {
+        get => selectedDatabaseId;
+        set
+        {
+            if (this.selectedDatabaseId != value)
+            {
+                this.selectedDatabaseId = value;
+                SelectedSchemaId = string.Empty;
+
+                SelectedDatabase = databases.Where(d => d.DatabaseId.ToString() == value).FirstOrDefault();
+                if (SelectedDatabase is not null)
+                {
+                    IsQueueDatabaseScrapeDisabled = false;
+
+                    SelectedDatabaseName = SelectedDatabase.DatabaseName;
+                    SelectedDatabasePurpose = SelectedDatabase.Purpose;
+                    SelectedDatabaseRemovalDate = SelectedDatabase.RemovalDate.ToString();
+                    SelectedDatabaseUpdatedDate = SelectedDatabase.UpdatedDate.ToString();                    
+                }
+                else
+                {
+                    IsQueueDatabaseScrapeDisabled = true;
+
+                    SelectedDatabaseName = string.Empty;
+                    SelectedDatabasePurpose = string.Empty;
+                    SelectedDatabaseRemovalDate = string.Empty;
+                    SelectedDatabaseUpdatedDate = string.Empty;   
+                }
+            }
+        }
+    }
+
+    private string selectedDatabaseName;
+    [Parameter]
+    public string SelectedDatabaseName
+    {
+        get => selectedDatabaseName;
+        set
+        {
+            if (this.selectedDatabaseName != value)
+            {
+                this.selectedDatabaseName = value;
+            }
+        }
+    }
+
+    private string selectedDatabasePurpose;
+    [Parameter]
+    public string SelectedDatabasePurpose
+    {
+        get => selectedDatabasePurpose;
+        set
+        {
+            if (this.selectedDatabasePurpose != value)
+            {
+                this.selectedDatabasePurpose = value;
+            }
+        }
+    }
+
+    private string selectedDatabaseRemovalDate;
+    [Parameter]
+    public string SelectedDatabaseRemovalDate
+    {
+        get => selectedDatabaseRemovalDate;
+        set
+        {
+            if (this.selectedDatabaseRemovalDate != value)
+            {
+                this.selectedDatabaseRemovalDate = value;
+            }
+        }
+    }
+
+    private string selectedDatabaseUpdatedDate;
+    [Parameter]
+    public string SelectedDatabaseUpdatedDate
+    {
+        get => selectedDatabaseUpdatedDate;
+        set
+        {
+            if (this.selectedDatabaseUpdatedDate != value)
+            {
+                this.selectedDatabaseUpdatedDate = value;
+            }
+        }
+    }
+
+    #endregion
+
+    #region Schema Data
+
+    private SchemaModel selectedSchema;
+    public SchemaModel SelectedSchema
+    {
+        get => selectedSchema;
+        set
+        {
+            if (value != null)
+            {
+                if (selectedSchema is null ||
+                    value.SchemaId != selectedSchema?.SchemaId)
+                {
+                    selectedSchema = value;
+                }
+            }
+        }
+    }
+
+    private string selectedSchemaId;
+    [Parameter]
+    public string SelectedSchemaId 
+    {
+        get => selectedSchemaId;
+        set
+        {
+            if (this.selectedSchemaId != value)
+            {
+                this.selectedSchemaId = value;
+                SelectedTableId = string.Empty;
+
+                SelectedSchema = schemas.Where(s => s.SchemaId.ToString() == value).FirstOrDefault();
+                if (SelectedSchema is not null)
+                {
+                    IsQueueSchemaScrapeDisabled = false;
+
+                    SelectedSchemaName = SelectedSchema.SchemaName;
+                    SelectedSchemaPurpose = SelectedSchema.Purpose;
+                    SelectedSchemaRemovalDate = SelectedSchema.RemovalDate.ToString();
+                    SelectedSchemaUpdatedDate = SelectedSchema.UpdatedDate.ToString();                    
+                }
+                else
+                {
+                    IsQueueSchemaScrapeDisabled = true;
+
+                    SelectedSchemaName = string.Empty;
+                    SelectedSchemaPurpose = string.Empty;
+                    SelectedSchemaRemovalDate = string.Empty;
+                    SelectedSchemaUpdatedDate = string.Empty;   
+                }
+            }
+        }
+    }
+
+    private string selectedSchemaName;
+    [Parameter]
+    public string SelectedSchemaName
+    {
+        get => selectedSchemaName;
+        set
+        {
+            if (this.selectedSchemaName != value)
+            {
+                this.selectedSchemaName = value;
+            }
+        }
+    }
+
+    private string selectedSchemaPurpose;
+    [Parameter]
+    public string SelectedSchemaPurpose
+    {
+        get => selectedSchemaPurpose;
+        set
+        {
+            if (this.selectedSchemaPurpose != value)
+            {
+                this.selectedSchemaPurpose = value;
+            }
+        }
+    }
+
+    private string selectedSchemaRemovalDate;
+    [Parameter]
+    public string SelectedSchemaRemovalDate
+    {
+        get => selectedSchemaRemovalDate;
+        set
+        {
+            if (this.selectedSchemaRemovalDate != value)
+            {
+                this.selectedSchemaRemovalDate = value;
+            }
+        }
+    }
+
+    private string selectedSchemaUpdatedDate;
+    [Parameter]
+    public string SelectedSchemaUpdatedDate
+    {
+        get => selectedSchemaUpdatedDate;
+        set
+        {
+            if (this.selectedSchemaUpdatedDate != value)
+            {
+                this.selectedSchemaUpdatedDate = value;
+            }
+        }
+    }
+
+    #endregion
+
+    #region Table Data
+
+    private TableModel selectedTable;
+    public TableModel SelectedTable
+    {
+        get => selectedTable;
+        set
+        {
+            if (value != null)
+            {
+                if (selectedTable is null ||
+                    value.TableId != selectedTable.TableId)
+                {
+                    selectedTable = value;
+                }
+            }
+        }
+    }
+
+    private string selectedTableId;
+    [Parameter]
+    public string SelectedTableId 
+    {
+        get => selectedTableId;
+        set
+        {
+            if (this.selectedTableId != value)
+            {
+                this.selectedTableId = value;
+                SelectedFieldId = string.Empty;
+
+                SelectedTable = tables.Where(t => t.TableId.ToString() == value).FirstOrDefault();
+                //GetFieldsByTableId(value);
+                GetLineage(value);
+                RenderUmlDiagram(SelectedTable);
+
+
+                if (SelectedTable is not null)
+                {
+                    IsQueueTableScrapeDisabled = false;
+                    IsQueueForeignKeyScrapeDisabled = false;
+                    IsQueueIndexScrapeDisabled = false;
+                    IsQueueConstraintScrapeDisabled = false;
+
+                    SelectedTableName = SelectedTable.TableName;
+                    SelectedTablePurpose = SelectedTable.Purpose;
+                    SelectedTableRemovalDate = SelectedTable.RemovalDate.ToString(); 
+                    SelectedTableUpdatedDate = SelectedTable.UpdatedDate.ToString();                    
+                }
+                else
+                {
+                    IsQueueTableScrapeDisabled = true;
+                    IsQueueForeignKeyScrapeDisabled = true;
+                    IsQueueIndexScrapeDisabled = true;
+                    IsQueueConstraintScrapeDisabled = true;
+
+                    SelectedTableName = string.Empty;
+                    SelectedTablePurpose = string.Empty;
+                    SelectedTableRemovalDate = string.Empty; 
+                    SelectedTableUpdatedDate = string.Empty;   
+                }
+            }
+        }
+    }
+
+    private string selectedTableName;
+    [Parameter]
+    public string SelectedTableName
+    {
+        get => selectedTableName;
+        set
+        {
+            if (this.selectedTableName != value)
+            {
+                this.selectedTableName = value;
+            }
+        }
+    }
+
+    private string selectedTablePurpose;
+    [Parameter]
+    public string SelectedTablePurpose
+    {
+        get => selectedTablePurpose;
+        set
+        {
+            if (this.selectedTablePurpose != value)
+            {
+                this.selectedTablePurpose = value;
+            }
+        }
+    }
+
+    private string selectedTableRemovalDate;
+    [Parameter]
+    public string SelectedTableRemovalDate
+    {
+        get => selectedTableRemovalDate;
+        set
+        {
+            if (this.selectedTableRemovalDate != value)
+            {
+                this.selectedTableRemovalDate = value;
+            }
+        }
+    }
+
+    private string selectedTableUpdatedDate;
+    [Parameter]
+    public string SelectedTableUpdatedDate
+    {
+        get => selectedTableUpdatedDate;
+        set
+        {
+            if (this.selectedTableUpdatedDate != value)
+            {
+                this.selectedTableUpdatedDate = value;
+            }
+        }
+    }
+
+    #endregion
+
+    #region Field Data
+
+    private async Task GetFieldsByTableId(string tableId)
+    {
+        int convertedTableId = int.Parse(tableId);
+        //fields = await fieldData.GetAllFieldsByTableId(int.Parse(tableId));
+        fields = await fieldEndpoint.GetAllFieldsByTableId(convertedTableId);
+    }
+
+    private FieldModel selectedField;
+
+    public FieldModel SelectedField
+    {
+        get => selectedField;
+        set
+        {
+            if (value != null)
+            {
+                if (selectedField is null ||
+                    value.FieldId != selectedField.FieldId)
+                {
+                    selectedField = value;
+                }
+            }
+        }
+    }
+
+
+    private string selectedFieldId;
+    [Parameter]
+    public string SelectedFieldId 
+    {
+        get => selectedFieldId;
+        set
+        {
+            if (this.selectedFieldId != value)
+            {
+                this.selectedFieldId = value;
+
+                if (value is not null && !string.Empty.Equals(value))
+                {
+                    SelectedField = fields.Where(f => f.FieldId.ToString() == value).FirstOrDefault();
+
+                    IsQueueFieldScrapeDisabled = false;
+
+                    SelectedFieldName = SelectedField.FieldName;
+                    SelectedFieldPurpose = SelectedField.Purpose;
+                    SelectedFieldNullability = SelectedField.IsNullable == 1 ? "Yes" : "No";
+                    SelectedFieldDataType = SelectedField.DataType;
+                    SelectedFieldOrdinalNumber = SelectedField.OrdinalNumber.ToString();
+                    SelectedFieldDefaultValue = SelectedField.DefaultValue;
+                    SelectedFieldCharacterLength = SelectedField.CharacterLength.ToString();
+                    SelectedFieldNumericPrecision = SelectedField.NumericPrecision.ToString();
+                    SelectedFieldNumericScale = SelectedField.NumericScale.ToString();
+                    SelectedFieldDateTimePrecision = SelectedField.DateTimePrecision.ToString();
+                    SelectedFieldCharacterSetName = SelectedField.CharacterSetName;
+                    SelectedFieldCollationName = SelectedField.CollationName;
+                    SelectedFieldMinValue = SelectedField.MinValue;
+                    SelectedFieldMaxValue = SelectedField.MaxValue;
+                    SelectedFieldSampleValue1 = SelectedField.SampleValue1;
+                    SelectedFieldSampleValue2 = SelectedField.SampleValue2;
+                    SelectedFieldSampleValue3 = SelectedField.SampleValue3;
+                    SelectedFieldSampleValue4 = SelectedField.SampleValue4;
+                    SelectedFieldSampleValue5 = SelectedField.SampleValue5;
+                    SelectedFieldSampleValue6 = SelectedField.SampleValue6;
+                    SelectedFieldSampleValue7 = SelectedField.SampleValue7;
+                    SelectedFieldSampleValue8 = SelectedField.SampleValue8;
+                    SelectedFieldSampleValue9 = SelectedField.SampleValue9;
+                    SelectedFieldSampleValue10 = SelectedField.SampleValue10;
+                    SelectedFieldNullPercentage = SelectedField.NullPercentage.ToString();
+                    SelectedFieldRemovalDate = SelectedField.RemovalDate.ToString();
+                    SelectedFieldUpdatedDate = SelectedField.UpdatedDate.ToString();
+                }
+                else
+                {
+                    SelectedField = null;
+
+                    IsQueueFieldScrapeDisabled = true;
+
+                    SelectedFieldName = string.Empty;
+                    SelectedFieldPurpose = string.Empty;
+                    SelectedFieldNullability = string.Empty;
+                    SelectedFieldDataType = string.Empty;
+                    SelectedFieldOrdinalNumber = string.Empty;
+                    SelectedFieldDefaultValue = string.Empty;
+                    SelectedFieldCharacterLength = string.Empty;
+                    SelectedFieldNumericPrecision = string.Empty;
+                    SelectedFieldNumericScale = string.Empty;
+                    SelectedFieldDateTimePrecision = string.Empty;
+                    SelectedFieldCharacterSetName = string.Empty;
+                    SelectedFieldCollationName = string.Empty;
+                    SelectedFieldMinValue = string.Empty;
+                    SelectedFieldMaxValue = string.Empty;
+                    SelectedFieldSampleValue1 = string.Empty;
+                    SelectedFieldSampleValue2 = string.Empty;
+                    SelectedFieldSampleValue3 = string.Empty;
+                    SelectedFieldSampleValue4 = string.Empty;
+                    SelectedFieldSampleValue5 = string.Empty;
+                    SelectedFieldSampleValue6 = string.Empty;
+                    SelectedFieldSampleValue7 = string.Empty;
+                    SelectedFieldSampleValue8 = string.Empty;
+                    SelectedFieldSampleValue9 = string.Empty;
+                    SelectedFieldSampleValue10 = string.Empty;
+                    SelectedFieldNullPercentage = string.Empty;
+                    SelectedFieldRemovalDate = string.Empty;
+                    SelectedFieldUpdatedDate = string.Empty;   
+                }
+            }
+        }
+    }
+
+    private string selectedFieldName;
+    [Parameter]
+    public string SelectedFieldName
+    {
+        get => selectedFieldName;
+        set
+        {
+            if (this.selectedFieldName != value)
+            {
+                this.selectedFieldName = value;
+            }
+        }
+    }
+
+    private string selectedFieldPurpose;
+    [Parameter]
+    public string SelectedFieldPurpose
+    {
+        get => selectedFieldPurpose;
+        set
+        {
+            if (this.selectedFieldPurpose != value)
+            {
+                this.selectedFieldPurpose = value;
+            }
+        }
+    }
+
+    private string selectedFieldNullability;
+    [Parameter]
+    public string SelectedFieldNullability
+    {
+        get => selectedFieldNullability;
+        set
+        {
+            if (this.selectedFieldNullability != value)
+            {
+                this.selectedFieldNullability = value;
+            }
+        }
+    }
+
+    private string selectedFieldDataType;
+    [Parameter]
+    public string SelectedFieldDataType
+    {
+        get => selectedFieldDataType;
+        set
+        {
+            if (this.selectedFieldDataType != value)
+            {
+                this.selectedFieldDataType = value;
+            }
+        }
+    }
+
+    private string selectedFieldOrdinalNumber;
+    [Parameter]
+    public string SelectedFieldOrdinalNumber
+    {
+        get => selectedFieldOrdinalNumber;
+        set
+        {
+            if (this.selectedFieldOrdinalNumber != value)
+            {
+                this.selectedFieldOrdinalNumber = value;
+            }
+        }
+    }
+
+    private string selectedFieldDefaultValue;
+    [Parameter]
+    public string SelectedFieldDefaultValue
+    {
+        get => selectedFieldDefaultValue;
+        set
+        {
+            if (this.selectedFieldDefaultValue != value)
+            {
+                this.selectedFieldDefaultValue = value;
+            }
+        }
+    }
+
+    private string selectedFieldCharacterLength;
+    [Parameter]
+    public string SelectedFieldCharacterLength
+    {
+        get => selectedFieldCharacterLength;
+        set
+        {
+            if (this.selectedFieldCharacterLength != value)
+            {
+                this.selectedFieldCharacterLength = value;
+            }
+        }
+    }
+
+    private string selectedFieldNumericPrecision;
+    [Parameter]
+    public string SelectedFieldNumericPrecision
+    {
+        get => selectedFieldNumericPrecision;
+        set
+        {
+            if (this.selectedFieldNumericPrecision != value)
+            {
+                this.selectedFieldNumericPrecision = value;
+            }
+        }
+    }
+
+    private string selectedFieldNumericScale;
+    [Parameter]
+    public string SelectedFieldNumericScale
+    {
+        get => selectedFieldNumericScale;
+        set
+        {
+            if (this.selectedFieldNumericScale != value)
+            {
+                this.selectedFieldNumericScale = value;
+            }
+        }
+    }
+
+    private string selectedFieldDateTimePrecision;
+    [Parameter]
+    public string SelectedFieldDateTimePrecision
+    {
+        get => selectedFieldDateTimePrecision;
+        set
+        {
+            if (this.selectedFieldDateTimePrecision != value)
+            {
+                this.selectedFieldDateTimePrecision = value;
+            }
+        }
+    }
+
+    private string selectedFieldCharacterSetName;
+    [Parameter]
+    public string SelectedFieldCharacterSetName
+    {
+        get => selectedFieldCharacterSetName;
+        set
+        {
+            if (this.selectedFieldCharacterSetName != value)
+            {
+                this.selectedFieldCharacterSetName = value;
+            }
+        }
+    }
+
+    private string selectedFieldCollationName;
+    [Parameter]
+    public string SelectedFieldCollationName
+    {
+        get => selectedFieldCollationName;
+        set
+        {
+            if (this.selectedFieldCollationName != value)
+            {
+                this.selectedFieldCollationName = value;
+            }
+        }
+    }
+
+    private string selectedFieldMinValue;
+    [Parameter]
+    public string SelectedFieldMinValue
+    {
+        get => selectedFieldMinValue;
+        set
+        {
+            if (this.selectedFieldMinValue != value)
+            {
+                this.selectedFieldMinValue = value;
+            }
+        }
+    }
+
+    private string selectedFieldMaxValue;
+    [Parameter]
+    public string SelectedFieldMaxValue
+    {
+        get => selectedFieldMaxValue;
+        set
+        {
+            if (this.selectedFieldMaxValue != value)
+            {
+                this.selectedFieldMaxValue = value;
+            }
+        }
+    }
+
+    private string selectedFieldSampleValue1;
+    [Parameter]
+    public string SelectedFieldSampleValue1
+    {
+        get => selectedFieldSampleValue1;
+        set
+        {
+            if (this.selectedFieldSampleValue1 != value)
+            {
+                this.selectedFieldSampleValue1 = value;
+            }
+        }
+    }
+
+    private string selectedFieldSampleValue2;
+    [Parameter]
+    public string SelectedFieldSampleValue2
+    {
+        get => selectedFieldSampleValue2;
+        set
+        {
+            if (this.selectedFieldSampleValue2 != value)
+            {
+                this.selectedFieldSampleValue2 = value;
+            }
+        }
+    }
+
+    private string selectedFieldSampleValue3;
+    [Parameter]
+    public string SelectedFieldSampleValue3
+    {
+        get => selectedFieldSampleValue3;
+        set
+        {
+            if (this.selectedFieldSampleValue3 != value)
+            {
+                this.selectedFieldSampleValue3 = value;
+            }
+        }
+    }
+
+    private string selectedFieldSampleValue4;
+    [Parameter]
+    public string SelectedFieldSampleValue4
+    {
+        get => selectedFieldSampleValue4;
+        set
+        {
+            if (this.selectedFieldSampleValue4 != value)
+            {
+                this.selectedFieldSampleValue4 = value;
+            }
+        }
+    }
+
+    private string selectedFieldSampleValue5;
+    [Parameter]
+    public string SelectedFieldSampleValue5
+    {
+        get => selectedFieldSampleValue5;
+        set
+        {
+            if (this.selectedFieldSampleValue5 != value)
+            {
+                this.selectedFieldSampleValue5 = value;
+            }
+        }
+    }
+
+    private string selectedFieldSampleValue6;
+    [Parameter]
+    public string SelectedFieldSampleValue6
+    {
+        get => selectedFieldSampleValue6;
+        set
+        {
+            if (this.selectedFieldSampleValue6 != value)
+            {
+                this.selectedFieldSampleValue6 = value;
+            }
+        }
+    }
+
+    private string selectedFieldSampleValue7;
+    [Parameter]
+    public string SelectedFieldSampleValue7
+    {
+        get => selectedFieldSampleValue7;
+        set
+        {
+            if (this.selectedFieldSampleValue7 != value)
+            {
+                this.selectedFieldSampleValue7 = value;
+            }
+        }
+    }
+
+    private string selectedFieldSampleValue8;
+    [Parameter]
+    public string SelectedFieldSampleValue8
+    {
+        get => selectedFieldSampleValue8;
+        set
+        {
+            if (this.selectedFieldSampleValue8 != value)
+            {
+                this.selectedFieldSampleValue8 = value;
+            }
+        }
+    }
+
+    private string selectedFieldSampleValue9;
+    [Parameter]
+    public string SelectedFieldSampleValue9
+    {
+        get => selectedFieldSampleValue9;
+        set
+        {
+            if (this.selectedFieldSampleValue9 != value)
+            {
+                this.selectedFieldSampleValue9 = value;
+            }
+        }
+    }
+
+    private string selectedFieldSampleValue10;
+    [Parameter]
+    public string SelectedFieldSampleValue10
+    {
+        get => selectedFieldSampleValue10;
+        set
+        {
+            if (this.selectedFieldSampleValue10 != value)
+            {
+                this.selectedFieldSampleValue10 = value;
+            }
+        }
+    }
+
+    private string selectedFieldNullPercentage;
+    [Parameter]
+    public string SelectedFieldNullPercentage
+    {
+        get => selectedFieldNullPercentage;
+        set
+        {
+            if (this.selectedFieldNullPercentage != value)
+            {
+                this.selectedFieldNullPercentage = value;
+            }
+        }
+    }
+
+    private string selectedFieldRemovalDate;
+    [Parameter]
+    public string SelectedFieldRemovalDate
+    {
+        get => selectedFieldRemovalDate;
+        set
+        {
+            if (this.selectedFieldRemovalDate != value)
+            {
+                this.selectedFieldRemovalDate = value;
+            }
+        }
+    }
+
+    private string selectedFieldUpdatedDate;
+    [Parameter]
+    public string SelectedFieldUpdatedDate
+    {
+        get => selectedFieldUpdatedDate;
+        set
+        {
+            if (this.selectedFieldUpdatedDate != value)
+            {
+                this.selectedFieldUpdatedDate = value;
+            }
+        }
+    }
+
+    #endregion
+
+    // Key Data  
+    private ForeignKeyModel? selectedForeignKey;
+    public ForeignKeyModel? SelectedForeignKey
+    {
+        get => selectedForeignKey;
+        set
+        {
+            if (this.selectedForeignKey != value)
+            {
+                selectedForeignKey = value;
+            }
+        }
+    }
+
+    private string selectedForeignKeyId;
+    [Parameter]
+    public string SelectedForeignKeyId
+    {
+        get => selectedForeignKeyId;
+        set
+        {
+            if (this.selectedForeignKeyId != value)
+            {
+                this.selectedForeignKeyId = value;
+
+                SelectedForeignKey = foreignKeys.Where(fk => fk.ForeignKeyId.ToString().Equals(value)).FirstOrDefault();
+            }
+        }
+    }
+
+    // Index Data
+    private IndexModel? selectedIndex;
+    public IndexModel? SelectedIndex
+    {
+        get => selectedIndex;
+        set
+        {
+            if (this.selectedIndex != value)
+            {
+                selectedIndex = value;
+            }
+        }
+    }
+
+    private string selectedIndexId;
+    [Parameter]
+    public string SelectedIndexId
+    {
+        get => selectedIndexId;
+        set
+        {
+            if (this.selectedIndexId != value)
+            {
+                this.selectedIndexId = value;
+
+                SelectedIndex = indexes.Where(i => i.IndexId.ToString().Equals(value)).FirstOrDefault();
+            }
+        }
+    }
+
+    // Constraint Data
+    private ConstraintModel? selectedConstraint;
+    public ConstraintModel? SelectedConstraint
+    {
+        get => selectedConstraint;
+        set
+        {
+            if (this.selectedConstraint != value)
+            {
+                selectedConstraint = value;
+            }
+        }
+    }
+
+    private string selectedConstraintId;
+    [Parameter]
+    public string SelectedConstraintId
+    {
+        get => selectedConstraintId;
+        set
+        {
+            if (this.selectedConstraintId != value)
+            {
+                this.selectedConstraintId = value;
+
+                SelectedConstraint = constraints.Where(c => c.ConstraintId.ToString().Equals(value)).FirstOrDefault();
+            }
+        }
+    }
+
+
+    private bool isQueueServerScrapeDisabled;
+    [Parameter]
+    public bool IsQueueServerScrapeDisabled
+    {
+        get => isQueueServerScrapeDisabled;
+        set
+        {
+            if (this.isQueueServerScrapeDisabled != value)
+            {
+                this.isQueueServerScrapeDisabled = value;
+            }
+        }
+    }
+
+    private bool isQueueDatabaseScrapeDisabled;
+    [Parameter]
+    public bool IsQueueDatabaseScrapeDisabled
+    {
+        get => isQueueDatabaseScrapeDisabled;
+        set
+        {
+            if (this.isQueueDatabaseScrapeDisabled != value)
+            {
+                this.isQueueDatabaseScrapeDisabled = value;
+            }
+        }
+    }
+
+    private bool isQueueSchemaScrapeDisabled;
+    [Parameter]
+    public bool IsQueueSchemaScrapeDisabled
+    {
+        get => isQueueSchemaScrapeDisabled;
+        set
+        {
+            if (this.isQueueSchemaScrapeDisabled != value)
+            {
+                this.isQueueSchemaScrapeDisabled = value;
+            }
+        }
+    }
+
+    private bool isQueueTableScrapeDisabled;
+    [Parameter]
+    public bool IsQueueTableScrapeDisabled
+    {
+        get => isQueueTableScrapeDisabled;
+        set
+        {
+            if (this.isQueueTableScrapeDisabled != value)
+            {
+                this.isQueueTableScrapeDisabled = value;
+            }
+        }
+    }
+
+    private bool isQueueFieldScrapeDisabled;
+    [Parameter]
+    public bool IsQueueFieldScrapeDisabled
+    {
+        get => isQueueFieldScrapeDisabled;
+        set
+        {
+            if (this.isQueueFieldScrapeDisabled != value)
+            {
+                this.isQueueFieldScrapeDisabled = value;
+            }
+        }
+    }
+
+    private bool isQueueForeignKeyScrapeDisabled;
+    [Parameter]
+    public bool IsQueueForeignKeyScrapeDisabled
+    {
+        get => isQueueForeignKeyScrapeDisabled;
+        set
+        {
+            if (this.isQueueForeignKeyScrapeDisabled != value)
+            {
+                this.isQueueForeignKeyScrapeDisabled = value;
+            }
+        }
+    }
+
+    private bool isQueueIndexScrapeDisabled;
+    [Parameter]
+    public bool IsQueueIndexScrapeDisabled
+    {
+        get => isQueueIndexScrapeDisabled;
+        set
+        {
+            if (this.isQueueIndexScrapeDisabled != value)
+            {
+                this.isQueueIndexScrapeDisabled = value;
+            }
+        }
+    }
+
+    private bool isQueueConstraintScrapeDisabled;
+    [Parameter]
+    public bool IsQueueConstraintScrapeDisabled
+    {
+        get => isQueueConstraintScrapeDisabled;
+        set
+        {
+            if (this.isQueueConstraintScrapeDisabled != value)
+            {
+                this.isQueueConstraintScrapeDisabled = value;
+            }
+        }
+    }
+
+    public void QueueServerScrape()
+    {
+        try 
+        {
+            Console.WriteLine("Attempt adding server to QueueScrape table.");
+            scrapeEndpoint.AddScrape("Server", "Server", int.Parse(SelectedServerId), DateTime.UtcNow);
+            toastService.ShowSuccess($"Added Server scrape for {SelectedServer.ServerName}");
+        }
+        catch (Exception ex)
+        {
+            throw;
+            Console.WriteLine("Exception Thrown in QueueServerScrape");
+            Console.WriteLine(ex.Message);
+            toastService.ShowError($"Adding Server scrape for {SelectedServer.ServerName} failed");
+        }
+    }
+
+    public void QueueDatabaseScrape()
+    {
+        try 
+        {
+            Console.WriteLine("Attempt adding database to QueueScrape table.");
+            scrapeEndpoint.AddScrape("Database", "Database", int.Parse(SelectedDatabaseId), DateTime.UtcNow);
+            toastService.ShowSuccess($"Added Database scrape for {SelectedDatabase.DatabaseName}");
+        }
+        catch (Exception ex)
+        {
+            throw;
+            Console.WriteLine("Exception Thrown in QueueDatabaseScrape");
+            Console.WriteLine(ex.Message);
+            toastService.ShowError($"Adding Database scrape for {SelectedDatabase.DatabaseName} failed");
+        }
+    }
+
+    public void QueueSchemaScrape()
+    {
+        try 
+        {
+            Console.WriteLine("Attempt adding schema to QueueScrape table.");
+            scrapeEndpoint.AddScrape("Schema", "Schema", int.Parse(SelectedSchemaId), DateTime.UtcNow);
+            toastService.ShowSuccess($"Added Schema scrape for {SelectedSchema.SchemaName}");
+        }
+        catch (Exception ex)
+        {
+            throw;
+            Console.WriteLine("Exception Thrown in QueueSchemaScrape");
+            Console.WriteLine(ex.Message);
+            toastService.ShowError($"Adding Schema scrape for {SelectedSchema.SchemaName} failed");
+        }
+    }
+
+    public void QueueTableScrape()
+    {
+        try 
+        {
+            Console.WriteLine("Attempt adding table to QueueScrape table.");
+            scrapeEndpoint.AddScrape("Table", "Table", int.Parse(SelectedTableId), DateTime.UtcNow);
+            toastService.ShowSuccess($"Added Table scrape for {SelectedTable.TableName}");
+        }
+        catch (Exception ex)
+        {
+            throw;
+            Console.WriteLine("Exception Thrown in QueueTableScrape");
+            Console.WriteLine(ex.Message);
+            toastService.ShowError($"Adding Table scrape for {SelectedTable.TableName} failed");
+        }
+    }
+
+    public void QueueFieldScrape()
+    {
+        try 
+        {
+            Console.WriteLine("Attempt adding field to QueueScrape table.");
+            scrapeEndpoint.AddScrape("Field", "Field", int.Parse(SelectedFieldId), DateTime.UtcNow);
+            toastService.ShowSuccess($"Added Field scrape for {SelectedField.FieldName}");
+        }
+        catch (Exception ex)
+        {
+            throw;
+            Console.WriteLine("Exception Thrown in QueueFieldScrape");
+            Console.WriteLine(ex.Message);
+            toastService.ShowError($"Adding Field scrape for {SelectedField.FieldName} failed");
+        }
+    }
+
+    public void QueueForeignKeyScrape()
+    {
+        try 
+        {
+            Console.WriteLine("Attempt adding foreign key to QueueScrape table.");
+            scrapeEndpoint.AddScrape("ForeignKey", "Table", int.Parse(SelectedTableId), DateTime.UtcNow);
+            toastService.ShowSuccess($"Added Foreign Key scrape for {SelectedTable.TableName}");
+        }
+        catch (Exception ex)
+        {
+            throw;
+            Console.WriteLine("Exception Thrown in QueueKeyScrape");
+            Console.WriteLine(ex.Message);
+            toastService.ShowError($"Adding Foreign Key scrape for {SelectedTable.TableName} failed");
+        }
+    }
+
+    public void QueueIndexScrape()
+    {
+        try 
+        {
+            Console.WriteLine("Attempt adding index to QueueScrape table.");
+            scrapeEndpoint.AddScrape("Index", "Table", int.Parse(SelectedTableId), DateTime.UtcNow);
+            toastService.ShowSuccess($"Added Index scrape for {SelectedTable.TableName}");
+        }
+        catch (Exception ex)
+        {
+            throw;
+            Console.WriteLine("Exception Thrown in QueueIndexScrape");
+            Console.WriteLine(ex.Message);
+            toastService.ShowError($"Adding Index scrape for {SelectedTable.TableName} failed");
+        }
+    }
+
+    public void QueueConstraintScrape()
+    {
+        try 
+        {
+            Console.WriteLine("Attempt adding constraint to QueueScrape table.");
+            scrapeEndpoint.AddScrape("Constraint", "Table", int.Parse(SelectedTableId), DateTime.UtcNow);
+            toastService.ShowSuccess($"Added Constraint scrape for {SelectedTable.TableName}");
+        }
+        catch (Exception ex)
+        {
+            throw;
+            Console.WriteLine("Exception Thrown in QueueConstraintScrape");
+            Console.WriteLine(ex.Message);
+            toastService.ShowSuccess($"Adding Constraint scrape for {SelectedTable.TableName} failed");
+        }
+    }
+
+    ////////////////
+    // Search Bar //
+    ////////////////
+    private string searchText = "";
+    public string SearchText 
+    { 
+        get => searchText; 
+        set
+        {
+            if (!searchText.Equals(value))
+            {
+                searchText = value;
+
+                if (string.IsNullOrEmpty(value))
+                {
+                    searchResults.Clear();
+
+                }
+                else
+                {
+                    switch (group.SelectedOption)
+                    {
+                        case "Exact Match":
+                            searchResults = databaseObjects.Where(o => o.DatabaseObjectName.ToLower().Equals(value.ToLower()) 
+                                                            || o.DatabaseFullAddress.ToLower().Equals(value.ToLower()) 
+                                                            || o.Purpose.ToLower().Equals(value.ToLower())).Take(100).ToList<DatabaseObjectModel>();
+                            break;
+                        case "Partial Match":
+                        default:
+                            searchResults = databaseObjects.Where(o => o.DatabaseObjectName.ToLower().Contains(value.ToLower()) 
+                                                            || o.DatabaseFullAddress.ToLower().Contains(value.ToLower()) 
+                                                            || o.Purpose.ToLower().Contains(value.ToLower())).Take(100).ToList<DatabaseObjectModel>();
+                            break;
+                    }
+                }
+            }
+
+            Console.WriteLine(SearchText);
+        }
+    }
+
+    private List<DatabaseObjectModel> searchResults = new();
+
+    private string selectedSearchResult = String.Empty;
+    public string SelectedSearchResult
+    {
+        get => selectedSearchResult;
+        set
+        {
+            if (this.selectedSearchResult.Equals(value) == false)
+            {
+                this.selectedSearchResult = value;
+
+                SearchText = String.Empty;
+                Console.WriteLine(value);
+
+                string resultType = value.Substring(0, value.IndexOf("-"));
+                string resultId = value.Substring(value.IndexOf("-") + 1, value.Length - value.IndexOf("-") - 1);
+
+                switch(resultType)
+                {
+                    case "Field":                     
+                        FieldModel field = fields.Where(f => f.FieldId.ToString() == resultId).FirstOrDefault();
+                        SelectedServerId = field.ServerId.ToString();
+                        SelectedDatabaseId = field.DatabaseId.ToString();
+                        SelectedSchemaId = field.SchemaId.ToString();
+                        SelectedTableId = field.TableId.ToString();
+                        SelectedFieldId = resultId;
+                        break;
+                    case "Table":                     
+                        TableModel table = tables.Where(t => t.TableId.ToString() == resultId).FirstOrDefault();
+                        SelectedServerId = table.ServerId.ToString();
+                        SelectedDatabaseId = table.DatabaseId.ToString();
+                        SelectedSchemaId = table.SchemaId.ToString();
+                        SelectedTableId = resultId;
+                        break;
+                    case "Schema":                     
+                        SchemaModel schema = schemas.Where(s => s.SchemaId.ToString() == resultId).FirstOrDefault();
+                        SelectedServerId = schema.ServerId.ToString();
+                        SelectedDatabaseId = schema.DatabaseId.ToString();
+                        SelectedSchemaId = resultId;
+                        break;
+                    case "Database":                        
+                        DatabaseModel database = databases.Where(d => d.DatabaseId.ToString() == resultId).FirstOrDefault();
+                        SelectedServerId = database.ServerId.ToString();
+                        SelectedDatabaseId = resultId;
+                        break;
+                    case "Server":
+                    default:
+                        SelectedServerId = resultId;
+                        break;
+                }
+            }
+        }
+    }
+
+    private void Status_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        InvokeAsync(StateHasChanged);
+
+        if (String.IsNullOrEmpty(SearchText))
+        {
+            searchResults.Clear();
+        }
+        else
+        {
+            switch (group.SelectedOption)
+            {
+                case "Exact Match":
+                    //searchResults = databaseObjects.Where(o => o.DatabaseObjectName.ToLower().Equals(SearchText.ToLower()) 
+                    //                                || o.DatabaseFullAddress.ToLower().Equals(SearchText.ToLower()) 
+                    //                                || o.Purpose.ToLower().Equals(SearchText.ToLower())).Take(100).ToList<DatabaseObjectModel>();
+                    searchResults = databaseObjectEndpoint.GetExactMatches(SearchText).Result;
+                    break;
+                case "Partial Match":
+                default:
+                    //searchResults = databaseObjects.Where(o => o.DatabaseObjectName.ToLower().Contains(SearchText.ToLower()) 
+                    //                                || o.DatabaseFullAddress.ToLower().Contains(SearchText.ToLower()) 
+                    //                                || o.Purpose.ToLower().Contains(SearchText.ToLower())).Take(100).ToList<DatabaseObjectModel>();
+                    searchResults = databaseObjectEndpoint.GetPartialMatches(SearchText).Result;
+                    break;
+            }
+        }
+    }
+
+    /////////////////
+    // UML Diagram //
+    /////////////////
+
+    private void OnLinkAdded(BaseLinkModel link)
+    {
+        link.TargetPortChanged += OnLinkTargetPortChanged;
+    }
+
+    private void OnLinkTargetPortChanged(BaseLinkModel link, PortModel oldPort, PortModel newPort)
+    {
+        link.Labels.Add(new LinkLabelModel(link, "1..*", -40, new Point(0, -30)));
+        link.Refresh();
+
+        ((newPort ?? oldPort) as ColumnPort).Column.Refresh();
+    }
+
+    private void Diagram_LinkRemoved(BaseLinkModel link)
+    {
+        link.TargetPortChanged -= OnLinkTargetPortChanged;
+
+        if (!link.IsAttached)
+        {
+            return;
+        }
+
+        if (link.SourcePort is not null &&
+            link.TargetPort is not null)
+        {
+            var sourceColumn = (link.SourcePort as ColumnPort).Column;
+            var targetColumn = (link.TargetPort as ColumnPort).Column;
+            (sourceColumn.Primary ? targetColumn : sourceColumn).Refresh();
+        }
+    }
+
+    private void Debug()
+    {
+        Console.WriteLine(diagram.Container);
+        foreach(var port in diagram.Nodes.ToList()[0].Ports)
+        {
+            Console.WriteLine(port.Position);
+        }
+    }
+
+    private enum UmlObjectType
+    {
+        Parent,
+        SelectedObject,
+        Children
+    }
+
+
+    /// <summary>
+    /// Draw the UML diagram objects. This includes the selected table's parents, the selected table, 
+    /// and the selected table's children.
+    /// </summary>
+    /// <returns>Task</returns>
+    private async Task RenderUmlDiagram(TableModel table)
+    {
+        diagram.Links.Clear();
+        diagram.Nodes.Clear();
+
+        if (table is not null)
+        {
+            List<TableModel> umlSelectedTableModel = new List<TableModel>() { table };
+            await DrawUmlObjects(umlSelectedTableModel, UmlObjectType.SelectedObject);
+
+            if (Parents.Count > 0)
+            {
+                await DrawUmlObjects(Parents, UmlObjectType.Parent, table.TableName);
+            }
+
+            if (Children.Count > 0)
+            {
+                await DrawUmlObjects(Children, UmlObjectType.Children, table.TableName);
+            }
+        }
+
+        NavigateToUmlOrigin();
+    }
+
+
+    /// <summary>
+    /// Reset diagram view back to the origin.
+    /// </summary>
+    /// <returns>Task</returns>
+    private async Task NavigateToUmlOrigin()
+    {
+        diagram.SetPan(0, 0);
+    }
+
+    private async Task DrawUmlObjects(List<TableModel> umlTables, UmlObjectType umlObjectType, string baseTableName = "")
+    {
+        int defaultTableWidth = 450;
+        int margin = 20;
+        int parentTableLeftMargin = margin;
+        int selectedTableLeftMargin = defaultTableWidth + (margin * 2);
+        int childTableLeftMargin = (defaultTableWidth * 2) + (margin * 3);
+        int tableItemHeight = 66;
+        int leftMargin;
+
+        switch(umlObjectType)
+        {
+            case UmlObjectType.Parent:
+                leftMargin = parentTableLeftMargin;
+                break;
+            case UmlObjectType.Children:
+                leftMargin = childTableLeftMargin;
+                break;
+            case UmlObjectType.SelectedObject:
+            default:
+                leftMargin = selectedTableLeftMargin;
+                break;
+        }
+
+        // Draw Objects
+        int incrementalDrawingHeight = 0;
+        int previousColumnCount = 0;
+        for(int i = 1; i <= umlTables.Count; i++)
+        {
+            incrementalDrawingHeight += margin;
+            if (i != 1)
+            {
+                incrementalDrawingHeight += (previousColumnCount + 1) * tableItemHeight;
+            }
+
+            // Declare a new Table object with a starting coordinate.
+            Table newTable = new Table(new Point(leftMargin, incrementalDrawingHeight));
+            newTable.Name = umlTables[i - 1].TableName;
+            Console.WriteLine($"Creating UML table '{umlTables[i - 1].TableName}'.");
+
+            // Add columns to the Table object.
+            List<FieldModel> tableFields = fields.Where(f => f.TableId == umlTables[i - 1].TableId).ToList();
+            previousColumnCount = tableFields.Count;
+            bool isPrimary = false;
+            Column column;
+
+            foreach(FieldModel field in tableFields)
+            {
+                isPrimary = field.PrimaryKey == 1 ? true : false;
+
+                column = new Column() { Name = field.FieldName, Primary = isPrimary, Type = GetColumnType(field.DataType.ToLower()) };
+                newTable.Columns.Add(column);
+
+                if (umlObjectType != UmlObjectType.Children)
+                {
+                    newTable.AddPort(column, PortAlignment.Right);
+                }
+
+                if (umlObjectType != UmlObjectType.Parent)
+                {
+                    newTable.AddPort(column, PortAlignment.Left);
+                }
+
+                Console.WriteLine($"Adding column [{newTable.Columns.Count}]: '{field.FieldName}'.");
+            }
+
+            // Add the table to the diagram.
+            diagram.Nodes.Add(newTable);
+
+            // Add links from the created table to the selected table.
+            if (umlObjectType == UmlObjectType.Parent)
+            {
+                diagram.Links.Add(new LinkModel(newTable, diagram.Nodes.Where(n => (n as Table).Name == baseTableName).FirstOrDefault()));
+            }
+
+            if (umlObjectType == UmlObjectType.Children)
+            {
+                diagram.Links.Add(new LinkModel(diagram.Nodes.Where(n => (n as Table).Name == baseTableName).FirstOrDefault(), newTable));
+            }
+
+            Console.WriteLine($"Added table to diagram.");
+        }
+    }
+
+    private Column.ColumnType GetColumnType(string type)
+    {
+                switch (type)
+                {
+                    case "bigint":
+                        return Column.ColumnType.bigint;
+                    case "binary":
+                        return Column.ColumnType.binary;
+                    case "bit":
+                        return Column.ColumnType.bit;
+                    case "char":
+                        return Column.ColumnType.@char;
+                    case "date":
+                        return Column.ColumnType.date;
+                    case "datetime":
+                        return Column.ColumnType.datetime;
+                    case "datetime2":
+                        return Column.ColumnType.datetime2;
+                    case "datetimeoffset":
+                        return Column.ColumnType.datetimeoffset;
+                    case "decimal":
+                        return Column.ColumnType.@decimal;
+                    case "float":
+                        return Column.ColumnType.@float;
+                    case "geography":
+                        return Column.ColumnType.geography;
+                    case "geometry":
+                        return Column.ColumnType.geometry;
+                    case "hierarchyid":
+                        return Column.ColumnType.hierarchyid;
+                    case "image":
+                        return Column.ColumnType.image;
+                    case "int":
+                        return Column.ColumnType.@int;
+                    case "money":
+                        return Column.ColumnType.money;
+                    case "nchar":
+                        return Column.ColumnType.nchar;
+                    case "ntext":
+                        return Column.ColumnType.ntext;
+                    case "numeric":
+                        return Column.ColumnType.numeric;
+                    case "nvarchar":
+                        return Column.ColumnType.nvarchar;
+                    case "real":
+                        return Column.ColumnType.real;
+                    case "smalldatetime":
+                        return Column.ColumnType.smalldatetime;
+                    case "smallint":
+                        return Column.ColumnType.smallint;
+                    case "smallmoney":
+                        return Column.ColumnType.smallmoney;
+                    case "sqlvariant":
+                        return Column.ColumnType.sqlvariant;
+                    case "text":
+                        return Column.ColumnType.text;
+                    case "time":
+                        return Column.ColumnType.time;
+                    case "timestamp":
+                        return Column.ColumnType.timestamp;
+                    case "tinyint":
+                        return Column.ColumnType.tinyint;
+                    case "uniqueidentifier":
+                        return Column.ColumnType.uniqueidentifier;
+                    case "varbinary":
+                        return Column.ColumnType.varbinary;
+                    case "varchar":
+                        return Column.ColumnType.varchar;
+                    case "xml":
+                        return Column.ColumnType.xml;
+                    default:
+                        return Column.ColumnType.nvarchar;
+                }
+    }
+
+    ////////////////////////
+    // Data Table Lineage //
+    ////////////////////////
+
+    private List<TableModel> parents = new();
+    public List<TableModel> Parents
+    {
+        get => parents;
+        set
+        {
+            if (value is null)
+            {
+                parents = new();
+            }
+            else
+            {
+                if (parents.Equals(value) == false)
+                {
+                    parents = value;
+                }
+            }
+        }
+    }
+
+    private List<TableModel> children = new();
+    public List<TableModel> Children
+    {
+        get => children;
+        set
+        {
+            if (value is null)
+            {
+                children = new();
+            }
+            else
+            {
+                if (children.Equals(value) == false)
+                {
+                    children = value;
+                }
+            }
+        }
+    }
+
+
+    private async Task GetLineage(string tableId)
+    {
+        var query =
+            from table in tables
+            join lineage in dataTableLineages on table.TableId equals lineage.ParentTableId
+            where lineage.ChildTableId == int.Parse(tableId)
+            select table;
+
+        Parents = query.ToList();
+
+        query =
+            from table in tables
+            join lineage in dataTableLineages on table.TableId equals lineage.ChildTableId
+            where lineage.ParentTableId == int.Parse(tableId)
+            select table;
+
+        Children = query.ToList();
+    }
+}

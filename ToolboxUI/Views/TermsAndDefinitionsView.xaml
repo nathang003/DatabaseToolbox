@@ -1,0 +1,305 @@
+﻿<UserControl x:Class="ToolboxUI.Views.TermsAndDefinitionsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:ToolboxUI.Views"
+             xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+             xmlns:cal="http://www.caliburnproject.org"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="780">
+    <DockPanel>
+        <Menu DockPanel.Dock="Top"
+              Background="{DynamicResource lightWhiteBrush}"
+              Padding="4">
+            <MenuItem Header="_File">
+                <MenuItem Header="_Quit"/>
+            </MenuItem>
+            <MenuItem Header="_Navigation">
+                
+                <MenuItem Header="Data Architecture">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="Click">
+                            <cal:ActionMessage MethodName="NavigateToDataArchitectureView"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </MenuItem>
+
+                <MenuItem Header="Settings">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="Click">
+                            <cal:ActionMessage MethodName="NavigateToSettingsView"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </MenuItem>
+
+            </MenuItem>
+        </Menu>
+
+        <Grid DockPanel.Dock="Top">
+            <FlowDocumentReader
+                 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+                <FlowDocument
+                    ColumnWidth="400"
+                    IsOptimalParagraphEnabled="True"
+                    IsHyphenationEnabled="True">
+                    <Section>
+                        <Paragraph FontSize="24">
+                            <Bold>Term Definitions</Bold>
+                        </Paragraph>
+
+                        <Paragraph>
+                            The terms presented here are used in varying business areas and cover a wide range of topics. This is an incomplete list and is updated infrequently. If you are aware of terms that should be included here, please notify
+                            <Hyperlink NavigateUri="mailto:ngallagher@mynexuscare.com">Nate Gallagher</Hyperlink> .
+                        </Paragraph>
+
+                        <Paragraph>
+                            <Bold>ALF</Bold>
+                            <Italic>Assisted Living Facility.</Italic>
+                        </Paragraph>
+
+                        <Paragraph>
+                            <Bold>BH</Bold>
+                            <Italic>Behavioral Health.</Italic>
+                        </Paragraph>
+
+                        <Paragraph>
+                            <Bold>C3</Bold>
+                            <Italic>Complex Care Coordination.</Italic>
+                            This category of care usually covers long-term patients and requires extra review for approval.
+                        </Paragraph>
+
+                        <Paragraph>
+                            <Bold>CARC</Bold>
+                            <Italic>Claim Adjusted Reason codes.</Italic>
+                        </Paragraph>
+
+                        <Paragraph>
+                            <Bold>Cert Period</Bold>
+                            <Italic>Certification Period.</Italic>
+                            This is a 60 day plan of care period. When the cert period ends, another cert period must approved to cover additional care.
+                        </Paragraph>
+
+                        <Paragraph>
+                            <Bold>CHF</Bold>
+                            <Italic>Congestive Heart Failure.</Italic>
+                        </Paragraph>
+
+                        <Paragraph>
+                            <Bold>Claim</Bold>
+                            <Italic>See Medical Claim.</Italic>
+                        </Paragraph>
+
+                        <Paragraph>
+                            <Bold>CLOF</Bold>
+                            <Italic>Current Level of Function.</Italic>
+                        </Paragraph>
+
+                        <Paragraph>
+                            <Bold>DB</Bold>
+                            <Italic>Database.</Italic>
+                            A usually large collection of data organized especially for rapid search and retrieval (as by a computer)
+                            <Italic>(
+                                <Hyperlink NavigateUri="https://www.merriam-webster.com/dictionary/database">Merriam-Webster</Hyperlink>)</Italic>
+                        </Paragraph>
+
+                        <Paragraph>
+                            <Bold>DC</Bold>
+                            <Italic>Discharge.</Italic>
+                        </Paragraph>
+
+                        <Paragraph>
+                            <Bold>DOV</Bold>
+                            <Italic>Discussion of Visits.</Italic>
+                        </Paragraph>
+
+                        <Paragraph>
+                            <Bold>ESRD</Bold>
+                            <Italic>End Stage Renal Disease.</Italic>
+                        </Paragraph>
+
+                        <Paragraph>
+                            <Bold>f/u</Bold>
+                            <Italic>Follow up.</Italic>
+                        </Paragraph>
+
+                        <Paragraph>
+                            <Bold>HCPC</Bold>
+                            <Italic>Healthcare Common Procedure Coding system.</Italic>
+                        </Paragraph>
+
+                        <Paragraph>
+                            <Bold>HEP</Bold>
+                            <Italic>Home Excercise Program.</Italic>
+                        </Paragraph>
+
+                        <Paragraph>
+                            <Bold>IBNR</Bold>
+                            <Italic>Incurred But Not Received.</Italic>
+                        </Paragraph>
+
+                        <Paragraph>
+                            <Bold>INR</Bold>
+                            <Italic>International Ratio.</Italic>
+                            This is a common blood draw lab.
+                        </Paragraph>
+
+                        <Paragraph>
+                            <Bold>JOC</Bold>
+                            <Italic>Joint Operating Committee.</Italic>
+                        </Paragraph>
+
+                        <Paragraph>
+                            <Bold>Medical Claim</Bold>
+                            <Italic>All-payer claims contain detailed diagnosis and procedure information for any billable patient visit. Healthcare organizations can use this claims information to:</Italic>
+                        </Paragraph>
+                        <List FontStyle="Italic">
+                            <ListItem>
+                                <Paragraph>Trace referral patterns</Paragraph>
+                            </ListItem>
+                            <ListItem>
+                                <Paragraph>Improve population health</Paragraph>
+                            </ListItem>
+                            <ListItem>
+                                <Paragraph>Increase sales</Paragraph>
+                            </ListItem>
+                            <ListItem>
+                                <Paragraph>Accelerate their go-to-market strategy</Paragraph>
+                            </ListItem>
+                        </List>
+                        <Paragraph>
+                            <Italic>(
+                                <Hyperlink NavigateUri="https://www.definitivehc.com/blog/medical-claims-101-what-you-need-to-know">Merriam-Webster</Hyperlink> )
+                            </Italic>
+                        </Paragraph>
+
+                        <Paragraph>
+                            <Bold>MER</Bold>
+                            <Italic>Medical Expense Ratio.</Italic>
+                            Averages 70%.
+                        </Paragraph>
+
+                        <Paragraph>
+                            <Bold>MREP</Bold>
+                            <Italic>Medicare Remit Easy Print.</Italic>
+                        </Paragraph>
+
+                        <Paragraph>
+                            <Bold>MSW</Bold>
+                            <Italic>Medical Social Worker.</Italic>
+                        </Paragraph>
+
+                        <Paragraph>
+                            <Bold>NPI</Bold>
+                            <Italic>National Provider Identifier.</Italic>
+                            The National Provider Identifier (NPI) is a Health Insurance Portability and Accountability Act (HIPAA) Administrative Simplification Standard. The NPI is a 10-digit, unique identification number for insured health care providers — created to improve the efficiency of electronically transmitted health information and delivered by CMS. Benefits of NPI standardization include:
+                        </Paragraph>
+                        <List>
+                            <ListItem>
+                                <Paragraph>Simplified electronic transmission of HIPAA transactions</Paragraph>
+                            </ListItem>
+                            <ListItem>
+                                <Paragraph>Unique, standardized identifiers for health care providers, health care plans, and employers</Paragraph>
+                            </ListItem>
+                            <ListItem>
+                                <Paragraph>Efficient coordination of benefit transactions</Paragraph>
+                            </ListItem>
+                        </List>
+                        <Paragraph>
+                            <Italic>(
+                                <Hyperlink NavigateUri="https://www.definitivehc.com/resources/glossary/national-provider-identifier-standard">Merriam-Webster</Hyperlink> )
+                            </Italic>
+                        </Paragraph>
+
+                        <Paragraph>
+                            <Bold>OT</Bold>
+                            <Italic>Occupational Therapy.</Italic>
+                        </Paragraph>
+
+                        <Paragraph>
+                            <Bold>PBP</Bold>
+                            <Italic>Plan Benfit Package.</Italic>
+                        </Paragraph>
+
+                        <Paragraph>
+                            <Bold>PDGM</Bold>
+                            <Italic>Patient Driven Grouping Model.</Italic>
+                        </Paragraph>
+                        <List>
+                            <ListItem>
+                                <Paragraph>The PDGM is a new payment model for the Home Health Prospective Payment 
+System (HH PPS) that relies more heavily on clinical characteristics and other 
+patient information to place home health periods of care into meaningful 
+payment categories and eliminates the use of therapy service thresholds.</Paragraph>
+                            </ListItem>
+                            <ListItem>
+                                <Paragraph>PDGM will take effect January 1, 2020.</Paragraph>
+                            </ListItem>
+                            <ListItem>
+                                <Paragraph>In conjunction with the implementation of the PDGM there will be a change in 
+the unit of home health payment from a 60-day episode to a 30-day period.
+                                </Paragraph>
+                            </ListItem>
+                        </List>
+                        <Paragraph>
+                            <Italic>(
+                                <Hyperlink NavigateUri="https://www.cms.gov/Outreach-and-Education/Outreach/NPC/Downloads/2019-02-12-PDGM-Presentation.pdf">Merriam-Webster</Hyperlink> )
+                            </Italic>
+                        </Paragraph>
+
+                        <Paragraph>
+                            <Bold>PDS</Bold>
+                            <Italic>Post Decision Support.</Italic>
+                        </Paragraph>
+
+                        <Paragraph>
+                            <Bold>POC</Bold>
+                            <Italic>Plan Of Care.</Italic>
+                        </Paragraph>
+
+                        <Paragraph>
+                            <Bold>PT</Bold>
+                            <Italic>Physical Therapy.</Italic>
+                        </Paragraph>
+
+                        <Paragraph>
+                            <Bold>Pt</Bold>
+                            <Italic>Patient.</Italic>
+                        </Paragraph>
+
+                        <Paragraph>
+                            <Bold>RARC</Bold>
+                            <Italic>Remittance Advice Remark Codes.</Italic>
+                        </Paragraph>
+
+                        <Paragraph>
+                            <Bold>ROC</Bold>
+                            <Italic></Italic>
+                        </Paragraph>
+
+                        <Paragraph>
+                            <Bold>SN</Bold>
+                            <Italic>Skilled Nursing.</Italic>
+                        </Paragraph>
+
+                        <Paragraph>
+                            <Bold>ST</Bold>
+                            <Italic>Speech Therapy.</Italic>
+                        </Paragraph>
+
+                        <Paragraph>
+                            <Bold>SOC</Bold>
+                            <Italic>Start Of Care.</Italic>
+                        </Paragraph>
+
+                        <Paragraph>
+                            <Bold>V/U</Bold>
+                            <Italic>Verbalized Understanding.</Italic>
+                        </Paragraph>
+                    </Section>
+                </FlowDocument>
+            </FlowDocumentReader>
+        </Grid>
+    </DockPanel>
+</UserControl>

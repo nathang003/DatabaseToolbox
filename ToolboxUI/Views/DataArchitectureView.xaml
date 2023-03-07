@@ -1,0 +1,1559 @@
+﻿<UserControl x:Class="ToolboxUI.Views.DataArchitectureView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:ToolboxUI.Views"
+             xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+             xmlns:sp="clr-namespace:ToolboxUI.Helpers"
+             xmlns:controls="clr-namespace:ToolboxUI.Controls"
+             xmlns:cal="http://www.caliburnproject.org"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="780">
+    <UserControl.Resources>
+        <!-- For large content, better go for a Virtualizing StackPanel -->
+        <ItemsPanelTemplate x:Key="ItemsTemplate">
+            <VirtualizingStackPanel/>
+        </ItemsPanelTemplate>
+    </UserControl.Resources>
+    
+    
+    <DockPanel>
+
+        <Menu DockPanel.Dock="Top"
+              Background="{DynamicResource lightWhiteBrush}"
+              Padding="4">
+
+            <MenuItem Header="_File">
+                
+                <MenuItem Header="_Quit">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="Click">
+                            <cal:ActionMessage MethodName="QuitToolbox"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </MenuItem>
+                
+            </MenuItem>
+            
+            <MenuItem Header="_Navigation">
+                
+                <MenuItem Header="_Settings">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="Click">
+                            <cal:ActionMessage MethodName="NavigateToSettingsView"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </MenuItem>
+                
+                <MenuItem Header="_Terms and Definitions">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="Click">
+                            <cal:ActionMessage MethodName="NavigateToTermsAndDefinitionsView"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </MenuItem>
+                
+            </MenuItem>
+
+            <MenuItem Header="Tools">
+
+                <MenuItem Header="Refresh _Databases">
+
+                    <MenuItem Header="Scan Servers _Only">
+
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="Click">
+                                <cal:ActionMessage MethodName="UpdateSelectedServerMapping">
+                                    <cal:Parameter Value="0"/>
+                                </cal:ActionMessage>
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+
+                    </MenuItem>
+
+                    <MenuItem Header="Scan Servers, and Nested _Databases">
+
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="Click">
+                                <cal:ActionMessage MethodName="UpdateSelectedServerMapping">
+                                    <cal:Parameter Value="1"/>
+                                </cal:ActionMessage>
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+
+                    </MenuItem>
+
+                    <MenuItem Header="Scan Servers, and Nested Databases and _Schemas">
+
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="Click">
+                                <cal:ActionMessage MethodName="UpdateSelectedServerMapping">
+                                    <cal:Parameter Value="2"/>
+                                </cal:ActionMessage>
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+
+                    </MenuItem>
+
+                    <MenuItem Header="Scan Servers, and _All Nested Items">
+
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="Click">
+                                <cal:ActionMessage MethodName="UpdateSelectedServerMapping">
+                                    <cal:Parameter Value="3"/>
+                                </cal:ActionMessage>
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+
+                    </MenuItem>
+
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="Click">
+                            <cal:ActionMessage MethodName="UpdateSelectedServerMapping">
+                                <cal:Parameter Value="0"/>
+                            </cal:ActionMessage>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                    
+                </MenuItem>
+
+                <MenuItem Header="Refresh _Schemas">
+
+                    <MenuItem Header="Scan Databases _Only">
+
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="Click">
+                                <cal:ActionMessage MethodName="UpdateSelectedDatabaseMapping">
+                                    <cal:Parameter Value="0"/>
+                                </cal:ActionMessage>
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+
+                    </MenuItem>
+
+                    <MenuItem Header="Scan Databases, and Nested _Schemas">
+
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="Click">
+                                <cal:ActionMessage MethodName="UpdateSelectedDatabaseMapping">
+                                    <cal:Parameter Value="1"/>
+                                </cal:ActionMessage>
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+
+                    </MenuItem>
+
+                    <MenuItem Header="Scan Databases, and _All Nested Items">
+
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="Click">
+                                <cal:ActionMessage MethodName="UpdateSelectedDatabaseMapping">
+                                    <cal:Parameter Value="2"/>
+                                </cal:ActionMessage>
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+
+                    </MenuItem>
+
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="Click">
+                            <cal:ActionMessage MethodName="UpdateSelectedDatabaseMapping">
+                                <cal:Parameter Value="0"/>
+                            </cal:ActionMessage>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                    
+                </MenuItem>
+
+                <MenuItem Header="Refresh _Tables">
+
+                    <MenuItem Header="Scan Tables _Only">
+
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="Click">
+                                <cal:ActionMessage MethodName="UpdateSelectedSchemaMapping">
+                                    <cal:Parameter Value="0"/>
+                                </cal:ActionMessage>
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+
+                    </MenuItem>
+
+                    <MenuItem Header="Scan Tables, and _All Nested Items">
+
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="Click">
+                                <cal:ActionMessage MethodName="UpdateSelectedSchemaMapping">
+                                    <cal:Parameter Value="1"/>
+                                </cal:ActionMessage>
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+
+                    </MenuItem>
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="Click">
+                            <cal:ActionMessage MethodName="UpdateSelectedSchemaMapping"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </MenuItem>
+
+                <MenuItem Header="Refresh Data _Values">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="Click">
+                            <cal:ActionMessage MethodName="UpdateSelectedTableMapping"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </MenuItem>
+
+                <MenuItem Header="Refresh Data _Lineage">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="Click">
+                            <cal:ActionMessage MethodName="FindDataTableLineage"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </MenuItem>
+
+            </MenuItem>
+            
+        </Menu>
+
+        <Grid DockPanel.Dock="Top">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="10"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="10"/>
+            </Grid.ColumnDefinitions>
+
+            <Grid.RowDefinitions>
+                
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="10"/>
+
+            </Grid.RowDefinitions>
+
+            <!-- Row 0 -->
+            <Separator 
+                Grid.Column="0"
+                Grid.ColumnSpan="3"
+                Grid.Row="0"
+                Background="Transparent"
+                BorderBrush ="Transparent"
+                Margin="2" />
+
+            <!-- Column 1 -->
+            <Grid
+                x:Name="SearchBoxGrid"
+                Grid.Column="1"
+                Grid.Row="1">
+
+                <Grid.ColumnDefinitions>
+
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+
+                </Grid.ColumnDefinitions>
+
+                <Grid.RowDefinitions>
+
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+
+                </Grid.RowDefinitions>
+
+                <WrapPanel
+                    Grid.Column="0"
+                    Grid.Row="0"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    Margin="0 0 5 0">
+
+                    <RadioButton
+                        x:Name="SearchOptionExactMatch"
+                        Margin="0 0 5 0"
+                        GroupName="searchTextMatch"
+                        cal:Message.Attach="[Event Checked] = [Action UpdateSearchResults(SearchOptionExactMatch.Name)]">Exact Match</RadioButton>
+
+                    <RadioButton
+                        x:Name="SearchOptionPartialMatch"
+                        GroupName="searchTextMatch"
+                        cal:Message.Attach="[Event Checked] = [Action UpdateSearchResults(SearchOptionPartialMatch.Name)]"
+                        IsChecked="True">Partial Match</RadioButton>
+
+                </WrapPanel>
+
+                <TextBox
+                    x:Name="SearchBox"
+                    Grid.Column="1"
+                    Grid.ColumnSpan="2"
+                    Grid.Row="0"
+                    Text="{Binding Path=SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    Padding="0 0 30 0"
+                    cal:Message.Attach="[Event TextChanged] = [Action UpdateSearchResultVisibility]">
+
+                    <TextBox.ToolTip>
+
+                        <ToolTip 
+                            BorderThickness="0"
+                            BorderBrush="Transparent"
+                            Background="Transparent"
+                            HasDropShadow="True">
+
+                            <Border Style="{StaticResource TooltipBorder}">
+
+                                <StackPanel>
+
+                                    <TextBlock Style="{StaticResource TooltipHeader}">Search Bar</TextBlock>
+
+                                    <TextBlock Style="{StaticResource TooltipBody}">Enter the name of a data element to locate it within the available servers, databases, schemas, tables, and/or fields.</TextBlock>
+
+                                </StackPanel>
+
+                            </Border>
+
+                        </ToolTip>
+
+                    </TextBox.ToolTip>
+
+                </TextBox>
+
+                <Button
+                    x:Name="SearchButton"
+                    Grid.Column="2"
+                    Grid.Row="0"
+                    Height="20"
+                    Width="20"
+                    Margin="5"
+                    Style="{DynamicResource appImageButtonStyle}"
+                    Background="{DynamicResource searchBrush}">
+                </Button>
+
+                <DataGrid
+                    x:Name="SearchResultsDataGrid"
+                    Grid.Column="1"
+                    Grid.ColumnSpan="2"
+                    Grid.Row="1"
+                    MaxHeight="250"
+                    ItemsSource="{Binding Path=SearchableDatabaseObjects, BindsDirectlyToSource=True}"
+                    HorizontalScrollBarVisibility="Auto"
+                    VerticalScrollBarVisibility="Auto"
+                    AutoGenerateColumns="False"
+                    Visibility="{Binding SearchResultGridIsVisible, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Hidden, BindsDirectlyToSource=True}"
+                    SelectionMode="Single"
+                    SelectionUnit="FullRow"
+                    cal:Message.Attach="[Event SelectionChanged]=[Action SearchResultSelected($this, $eventArgs)]">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="ServerId" Binding="{Binding ServerId}" Visibility="Hidden"/>
+                        <DataGridTextColumn Header="Server" Binding="{Binding ServerName}" />
+                        <DataGridTextColumn Header="DatabaseId" Binding="{Binding DatabaseId}" Visibility="Hidden"/>
+                        <DataGridTextColumn Header="Database" Binding="{Binding DatabaseName}" />
+                        <DataGridTextColumn Header="SchemaId" Binding="{Binding SchemaId}" Visibility="Hidden"/>
+                        <DataGridTextColumn Header="Schema" Binding="{Binding SchemaName}" />
+                        <DataGridTextColumn Header="TableId" Binding="{Binding TableId}" Visibility="Hidden"/>
+                        <DataGridTextColumn Header="Table" Binding="{Binding TableName}" />
+                        <DataGridTextColumn Header="FieldId" Binding="{Binding FieldId}" Visibility="Hidden"/>
+                        <DataGridTextColumn Header="Field" Binding="{Binding FieldName}" />
+                    </DataGrid.Columns>
+                </DataGrid>
+
+            </Grid>
+
+            <!-- Row 2 -->
+            <Separator 
+                Grid.Column="0"
+                Grid.ColumnSpan="3"
+                Grid.Row="2"
+                Background="{DynamicResource lightWhiteBrush}"
+                BorderBrush ="Transparent"
+                Margin="3" />
+
+            <!-- Row 3 -->
+            <Grid
+                Grid.Row="3"
+                Grid.Column="1"
+                x:Name="DataObjectGrid">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="150"/>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="150"/>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="100"/>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="150"/>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="150"/>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="10"/>
+                </Grid.ColumnDefinitions>
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition x:Name="DataObjectGridRow"  Height="*"/>
+                    <RowDefinition Height="10"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!--#region Servers-->
+                <TextBlock 
+                    Grid.Column="1"
+                    Grid.Row="0"
+                    Text="Servers"
+                    Style="{StaticResource HeaderTextBlock}"/>
+
+                <ListView
+                    x:Name="Servers"
+                    Grid.Column="1"
+                    Grid.Row="1"
+                    VerticalAlignment="Stretch"
+                    Style="{DynamicResource UMLListView}"
+                    SelectedItem="{Binding SelectedServer}">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding ServerName}" />
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="{x:Type ListViewItem}">
+                            <Setter Property="ToolTip">
+                                <Setter.Value>
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding ServerName}"/>
+                                    </StackPanel>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ListView.ItemContainerStyle>
+                    <ListView.ContextMenu>
+                        <ContextMenu Name="ServersContextMenu">
+                            <MenuItem Header="Refresh Server"
+                                      cal:Message.Attach="UpdateSelectedServerMapping"></MenuItem>
+                        </ContextMenu>
+                    </ListView.ContextMenu>
+                </ListView>
+                <!--#endregion-->
+
+                <!--#region Databases -->
+                <TextBlock 
+                    Grid.Column="3"
+                    Grid.Row="0"
+                    Text="Databases"
+                    Style="{StaticResource HeaderTextBlock}"/>
+
+                <ListView
+                    x:Name="Databases"
+                    Grid.Column="3"
+                    Grid.Row="1"
+                    VerticalAlignment="Stretch"
+                    Style="{DynamicResource UMLListView}"
+                    SelectedItem="{Binding SelectedDatabase}">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding DatabaseName}" />
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="{x:Type ListViewItem}">
+                            <Setter Property="ToolTip">
+                                <Setter.Value>
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding DatabaseName}"/>
+                                    </StackPanel>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ListView.ItemContainerStyle>
+                    <ListView.ContextMenu>
+                        <ContextMenu Name="DatabasesContextMenu">
+                            <MenuItem Header="Refresh Database"
+                                      cal:Message.Attach="UpdateSelectedDatabaseMapping"/>
+                        </ContextMenu>
+                    </ListView.ContextMenu>
+                </ListView>
+
+                <!--#endregion-->
+
+                <!--#region Schemas -->
+                <TextBlock 
+                    Grid.Column="5"
+                    Grid.Row="0"
+                    Text="Schemas"
+                    Style="{StaticResource HeaderTextBlock}"/>
+
+                <ListView
+                    x:Name="Schemas"
+                    Grid.Column="5"
+                    Grid.Row="1"
+                    VerticalAlignment="Stretch"
+                    Style="{DynamicResource UMLListView}"
+                    SelectedItem="{Binding SelectedSchema}">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding SchemaName}"/>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="{x:Type ListViewItem}">
+                            <Setter Property="ToolTip">
+                                <Setter.Value>
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding SchemaName}"/>
+                                    </StackPanel>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ListView.ItemContainerStyle>
+                    <ListView.ContextMenu>
+                        <ContextMenu Name="SchemasContextMenu">
+                            <MenuItem Header="Refresh Schema"
+                                      cal:Message.Attach="UpdateSelectedSchemaMapping"/>
+                        </ContextMenu>
+                    </ListView.ContextMenu>
+                </ListView>
+
+                <!--#endregion-->
+
+                <!--#region Tables -->
+                <TextBlock 
+                    Grid.Column="7"
+                    Grid.Row="0"
+                    Text="Tables"
+                    Style="{DynamicResource HeaderTextBlock}"/>
+
+                <ListView
+                    x:Name="Tables"
+                    Grid.Column="7"
+                    Grid.Row="1"
+                    VerticalAlignment="Stretch"
+                    Style="{DynamicResource UMLListView}"
+                    SelectedItem="{Binding SelectedTable}">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding TableName}"/>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="{x:Type ListViewItem}">
+                            <Setter Property="ToolTip">
+                                <Setter.Value>
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding TableName}"/>
+                                    </StackPanel>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ListView.ItemContainerStyle>
+                    <ListView.ContextMenu>
+                        <ContextMenu Name="TablesContextMenu">
+                            <MenuItem Header="Refresh Table"
+                                      cal:Message.Attach="UpdateSelectedTableMapping"/>
+                        </ContextMenu>
+                    </ListView.ContextMenu>
+                </ListView>
+
+                <!--#endregion-->
+
+                <!--#region Fields -->
+                <TextBlock
+                    Grid.Column="9"
+                    Grid.Row="0"
+                    Text="Fields"
+                    Style="{DynamicResource HeaderTextBlock}"/>
+
+                <ListView
+                    x:Name="Columns"
+                    Grid.Column="9"
+                    Grid.Row="1"
+                    VerticalAlignment="Stretch"
+                    Style="{DynamicResource UMLListView}"
+                    SelectedItem="{Binding SelectedColumn}">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding FullFieldName}"/>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="{x:Type ListViewItem}">
+                            <Setter Property="ToolTip">
+                                <Setter.Value>
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding FullFieldName}"/>
+                                    </StackPanel>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ListView.ItemContainerStyle>
+                </ListView>
+                <!--#endregion-->
+
+                <!--#region Field Properties-->
+                <!-- Column 5 -->
+                <TextBlock
+                    Grid.Column="11"
+                    Grid.Row="0"
+                    Text="Properties"
+                    Style="{DynamicResource HeaderTextBlock}"/>
+
+                <Border
+                    Grid.Column="11"
+                    Grid.Row="1"
+                    Style="{DynamicResource SectionBorder}">
+
+                    <ScrollViewer
+                    x:Name="PropertiesControl"
+                    BorderThickness="0"
+                    HorizontalScrollBarVisibility="Auto"
+                    VerticalScrollBarVisibility="Auto">
+                        <Grid
+                        Margin="5">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="100"/>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="150"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <!-- Row 0 -->
+                            <TextBlock 
+                            Grid.Column="0"
+                            Grid.Row="0"
+                            Text="Purpose"
+                            FontWeight="Bold"/>
+
+                            <TextBlock 
+                            x:Name="Purpose"
+                            Grid.Column="2"
+                            Grid.Row="0">
+                                <TextBlock.ToolTip>
+                                    <ToolTip>
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding Purpose}"
+                                                    TextWrapping="Wrap"
+                                                    MaxWidth="500"/>
+                                        </StackPanel>
+                                    </ToolTip>
+                                </TextBlock.ToolTip>
+                        </TextBlock>
+
+                            <TextBlock 
+                            Grid.Column="4"
+                            Grid.Row="0"
+                            Text="Min Value"
+                            FontWeight="Bold"/>
+
+                            <TextBlock 
+                            x:Name="MinValue"
+                            Grid.Column="6"
+                            Grid.Row="0">
+                                <TextBlock.ToolTip>
+                                    <ToolTip>
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding MinValue}"
+                                                    TextWrapping="Wrap"
+                                                    MaxWidth="300"/>
+                                        </StackPanel>
+                                    </ToolTip>
+                                </TextBlock.ToolTip>
+                        </TextBlock>
+
+                            <!-- Row 1 -->
+                            <TextBlock 
+                            Grid.Column="0"
+                            Grid.Row="1"
+                            Text="Ordinal Number"
+                            FontWeight="Bold"/>
+
+                            <TextBlock 
+                            x:Name="OrdinalNumber"
+                            Grid.Column="2"
+                            Grid.Row="1">
+                                <TextBlock.ToolTip>
+                                    <ToolTip>
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding OrdinalNumber}"/>
+                                        </StackPanel>
+                                    </ToolTip>
+                                </TextBlock.ToolTip>
+                        </TextBlock>
+
+                            <TextBlock 
+                            Grid.Column="4"
+                            Grid.Row="1"
+                            Text="Max Value"
+                            FontWeight="Bold"/>
+
+                            <TextBlock 
+                            x:Name="MaxValue"
+                            Grid.Column="6"
+                            Grid.Row="1">
+                                <TextBlock.ToolTip>
+                                    <ToolTip>
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding MaxValue}"
+                                                    TextWrapping="Wrap"
+                                                    MaxWidth="300"/>
+                                        </StackPanel>
+                                    </ToolTip>
+                                </TextBlock.ToolTip>
+                        </TextBlock>
+
+                            <!-- Row 2 -->
+                            <TextBlock 
+                            Grid.Column="0"
+                            Grid.Row="2"
+                            Text="Default Value"
+                            FontWeight="Bold"/>
+
+                            <TextBlock 
+                            x:Name="DefaultValue"
+                            Grid.Column="2"
+                            Grid.Row="2">
+                                <TextBlock.ToolTip>
+                                    <ToolTip>
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding DefaultValue}"
+                                                    TextWrapping="Wrap"
+                                                    MaxWidth="300"/>
+                                        </StackPanel>
+                                    </ToolTip>
+                                </TextBlock.ToolTip>
+                        </TextBlock>
+
+                            <TextBlock 
+                            Grid.Column="4"
+                            Grid.Row="2"
+                            Text="Sample Value 1"
+                            FontWeight="Bold"/>
+
+                            <TextBlock 
+                            x:Name="SampleValue1"
+                            Grid.Column="6"
+                            Grid.Row="2">
+                                <TextBlock.ToolTip>
+                                    <ToolTip>
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding SampleValue1}"
+                                                    TextWrapping="Wrap"
+                                                    MaxWidth="300"/>
+                                        </StackPanel>
+                                    </ToolTip>
+                                </TextBlock.ToolTip>
+                        </TextBlock>
+
+                            <!-- Row 3 -->
+                            <TextBlock 
+                            Grid.Column="0"
+                            Grid.Row="3"
+                            Text="Nullable"
+                            FontWeight="Bold"/>
+
+                            <TextBlock 
+                            x:Name="Nullable"
+                            Grid.Column="2"
+                            Grid.Row="3">
+                                <TextBlock.ToolTip>
+                                    <ToolTip>
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding Nullable}"/>
+                                        </StackPanel>
+                                    </ToolTip>
+                                </TextBlock.ToolTip>
+                        </TextBlock>
+
+                            <TextBlock 
+                            Grid.Column="4"
+                            Grid.Row="3"
+                            Text="Sample Value 2"
+                            FontWeight="Bold"/>
+
+                            <TextBlock 
+                            x:Name="SampleValue2"
+                            Grid.Column="6"
+                            Grid.Row="3">
+                                <TextBlock.ToolTip>
+                                    <ToolTip>
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding SampleValue2}"
+                                                    TextWrapping="Wrap"
+                                                    MaxWidth="300"/>
+                                        </StackPanel>
+                                    </ToolTip>
+                                </TextBlock.ToolTip>
+                        </TextBlock>
+
+                            <!-- Row 4 -->
+                            <TextBlock 
+                            Grid.Column="0"
+                            Grid.Row="4"
+                            Text="Data Type"
+                            FontWeight="Bold"/>
+
+                            <TextBlock 
+                            x:Name="DataType"
+                            Grid.Column="2"
+                            Grid.Row="4">
+                                <TextBlock.ToolTip>
+                                    <ToolTip>
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding DataType}"/>
+                                        </StackPanel>
+                                    </ToolTip>
+                                </TextBlock.ToolTip>
+                        </TextBlock>
+
+                            <TextBlock 
+                            Grid.Column="4"
+                            Grid.Row="4"
+                            Text="Sample Value 3"
+                            FontWeight="Bold"/>
+
+                            <TextBlock 
+                            x:Name="SampleValue3"
+                            Grid.Column="6"
+                            Grid.Row="4">
+                                <TextBlock.ToolTip>
+                                    <ToolTip>
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding SampleValue3}"
+                                                    TextWrapping="Wrap"
+                                                    MaxWidth="300"/>
+                                        </StackPanel>
+                                    </ToolTip>
+                                </TextBlock.ToolTip>
+                        </TextBlock>
+
+                            <!-- Row 5 -->
+                            <TextBlock 
+                            Grid.Column="0"
+                            Grid.Row="5"
+                            Text="Character Length"
+                            FontWeight="Bold"/>
+
+                            <TextBlock 
+                            x:Name="CharacterLength"
+                            Grid.Column="2"
+                            Grid.Row="5">
+                                <TextBlock.ToolTip>
+                                    <ToolTip>
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding CharacterLength}"/>
+                                        </StackPanel>
+                                    </ToolTip>
+                                </TextBlock.ToolTip>
+                        </TextBlock>
+
+                            <TextBlock 
+                            Grid.Column="4"
+                            Grid.Row="5"
+                            Text="Sample Value 4"
+                            FontWeight="Bold"/>
+
+                            <TextBlock 
+                            x:Name="SampleValue4"
+                            Grid.Column="6"
+                            Grid.Row="5">
+                                <TextBlock.ToolTip>
+                                    <ToolTip>
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding SampleValue4}"
+                                                    TextWrapping="Wrap"
+                                                    MaxWidth="300"/>
+                                        </StackPanel>
+                                    </ToolTip>
+                                </TextBlock.ToolTip>
+                        </TextBlock>
+
+                            <!-- Row 6 -->
+                            <TextBlock 
+                            Grid.Column="0"
+                            Grid.Row="6"
+                            Text="Numeric Precision"
+                            FontWeight="Bold"/>
+
+                            <TextBlock 
+                            x:Name="NumericPrecision"
+                            Grid.Column="2"
+                            Grid.Row="6">
+                                <TextBlock.ToolTip>
+                                    <ToolTip>
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding NumericPrecision}"/>
+                                        </StackPanel>
+                                    </ToolTip>
+                                </TextBlock.ToolTip>
+                        </TextBlock>
+
+                            <TextBlock 
+                            Grid.Column="4"
+                            Grid.Row="6"
+                            Text="Sample Value 5"
+                            FontWeight="Bold"/>
+
+                            <TextBlock 
+                            x:Name="SampleValue5"
+                            Grid.Column="6"
+                            Grid.Row="6">
+                                <TextBlock.ToolTip>
+                                    <ToolTip>
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding SampleValue5}"
+                                                    TextWrapping="Wrap"
+                                                    MaxWidth="300"/>
+                                        </StackPanel>
+                                    </ToolTip>
+                                </TextBlock.ToolTip>
+                        </TextBlock>
+
+                            <!-- Row 7 -->
+                            <TextBlock 
+                            Grid.Column="0"
+                            Grid.Row="7"
+                            Text="Numeric Scale"
+                            FontWeight="Bold"/>
+
+                            <TextBlock 
+                            x:Name="NumericScale"
+                            Grid.Column="2"
+                            Grid.Row="7">
+                                <TextBlock.ToolTip>
+                                    <ToolTip>
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding NumericScale}"/>
+                                        </StackPanel>
+                                    </ToolTip>
+                                </TextBlock.ToolTip>
+                        </TextBlock>
+
+                            <TextBlock 
+                            Grid.Column="4"
+                            Grid.Row="7"
+                            Text="Sample Value 6"
+                            FontWeight="Bold"/>
+
+                            <TextBlock 
+                            x:Name="SampleValue6"
+                            Grid.Column="6"
+                            Grid.Row="7">
+                                <TextBlock.ToolTip>
+                                    <ToolTip>
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding SampleValue6}"
+                                                    TextWrapping="Wrap"
+                                                    MaxWidth="300"/>
+                                        </StackPanel>
+                                    </ToolTip>
+                                </TextBlock.ToolTip>
+                        </TextBlock>
+
+                            <!-- Row 8 -->
+                            <TextBlock 
+                            Grid.Column="0"
+                            Grid.Row="8"
+                            Text="DateTime Precision"
+                            FontWeight="Bold"/>
+
+                            <TextBlock 
+                            x:Name="DateTimePrecision"
+                            Grid.Column="2"
+                            Grid.Row="8">
+                                <TextBlock.ToolTip>
+                                    <ToolTip>
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding DateTimePrecision}"/>
+                                        </StackPanel>
+                                    </ToolTip>
+                                </TextBlock.ToolTip>
+                        </TextBlock>
+
+                            <TextBlock 
+                            Grid.Column="4"
+                            Grid.Row="8"
+                            Text="Sample Value 7"
+                            FontWeight="Bold"/>
+
+                            <TextBlock 
+                            x:Name="SampleValue7"
+                            Grid.Column="6"
+                            Grid.Row="8">
+                                <TextBlock.ToolTip>
+                                    <ToolTip>
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding SampleValue7}"
+                                                    TextWrapping="Wrap"
+                                                    MaxWidth="300"/>
+                                        </StackPanel>
+                                    </ToolTip>
+                                </TextBlock.ToolTip>
+                        </TextBlock>
+
+                            <!-- Row 9 -->
+                            <TextBlock 
+                            Grid.Column="0"
+                            Grid.Row="9"
+                            Text="Character Set Name"
+                            FontWeight="Bold"/>
+
+                            <TextBlock 
+                            x:Name="CharacterSetName"
+                            Grid.Column="2"
+                            Grid.Row="9">
+                                <TextBlock.ToolTip>
+                                    <ToolTip>
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding CharacterSetName}"/>
+                                        </StackPanel>
+                                    </ToolTip>
+                                </TextBlock.ToolTip>
+                        </TextBlock>
+
+                            <TextBlock 
+                            Grid.Column="4"
+                            Grid.Row="9"
+                            Text="Sample Value 8"
+                            FontWeight="Bold"/>
+
+                            <TextBlock 
+                            x:Name="SampleValue8"
+                            Grid.Column="6"
+                            Grid.Row="9">
+                                <TextBlock.ToolTip>
+                                    <ToolTip>
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding SampleValue8}"
+                                                    TextWrapping="Wrap"
+                                                    MaxWidth="300"/>
+                                        </StackPanel>
+                                    </ToolTip>
+                                </TextBlock.ToolTip>
+                        </TextBlock>
+
+                            <!-- Row 10 -->
+                            <TextBlock 
+                            Grid.Column="0"
+                            Grid.Row="10"
+                            Text="Collation Name"
+                            FontWeight="Bold"/>
+
+                            <TextBlock 
+                            x:Name="CollationName"
+                            Grid.Column="2"
+                            Grid.Row="10">
+                                <TextBlock.ToolTip>
+                                    <ToolTip>
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding CollationName}"/>
+                                        </StackPanel>
+                                    </ToolTip>
+                                </TextBlock.ToolTip>
+                        </TextBlock>
+
+                            <TextBlock 
+                            Grid.Column="4"
+                            Grid.Row="10"
+                            Text="Sample Value 9"
+                            FontWeight="Bold"/>
+
+                            <TextBlock 
+                            x:Name="SampleValue9"
+                            Grid.Column="6"
+                            Grid.Row="10">
+                                <TextBlock.ToolTip>
+                                    <ToolTip>
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding SampleValue9}"
+                                                    TextWrapping="Wrap"
+                                                    MaxWidth="300"/>
+                                        </StackPanel>
+                                    </ToolTip>
+                                </TextBlock.ToolTip>
+                        </TextBlock>
+
+                            <!-- Row 11 -->
+                            <TextBlock 
+                            Grid.Column="0"
+                            Grid.Row="11"
+                            Text="Primary Key"
+                            FontWeight="Bold"/>
+
+                            <TextBlock 
+                            x:Name="PrimaryKey"
+                            Grid.Column="2"
+                            Grid.Row="11">
+                                <TextBlock.ToolTip>
+                                    <ToolTip>
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding PrimaryKey}"/>
+                                        </StackPanel>
+                                    </ToolTip>
+                                </TextBlock.ToolTip>
+                        </TextBlock>
+
+                            <TextBlock 
+                            Grid.Column="4"
+                            Grid.Row="11"
+                            Text="Sample Value 10"
+                            FontWeight="Bold"/>
+
+                            <TextBlock 
+                            x:Name="SampleValue10"
+                            Grid.Column="6"
+                            Grid.Row="11">
+                                <TextBlock.ToolTip>
+                                    <ToolTip>
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding SampleValue10}"
+                                                    TextWrapping="Wrap"
+                                                    MaxWidth="300"/>
+                                        </StackPanel>
+                                    </ToolTip>
+                                </TextBlock.ToolTip>
+                        </TextBlock>
+
+                            <!-- Row 12 -->
+                            <TextBlock 
+                            Grid.Column="0"
+                            Grid.Row="12"
+                            Text="Indexed"
+                            FontWeight="Bold"/>
+
+                            <TextBlock 
+                            x:Name="Indexed"
+                            Grid.Column="2"
+                            Grid.Row="12">
+                                <TextBlock.ToolTip>
+                                    <ToolTip>
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding Indexed}"/>
+                                        </StackPanel>
+                                    </ToolTip>
+                                </TextBlock.ToolTip>
+                        </TextBlock>
+                        </Grid>
+                    </ScrollViewer>
+                </Border>
+                <!--#endregion-->
+
+                <!--#region Appearances-->
+                <Border
+                    Grid.Column="11"
+                    Grid.Row="3"
+                    Style="{DynamicResource SectionBorder}">
+
+                    <Grid
+                        x:Name="AppearancesGrid"
+                        Margin="5">
+
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock
+                        Text="Appearances"
+                            Style="{StaticResource HeaderTextBlock}"/>
+
+                        <Border
+                            Grid.Column="0"
+                            Grid.Row="1"
+                                Style="{StaticResource UMLObjectBorder}">
+
+                            <ListView
+                            x:Name="Appearances"
+                            Grid.Column="0"
+                            Grid.Row="2"
+                            DisplayMemberPath="Locations"
+                            Background="Transparent"
+                            BorderBrush="Transparent"
+                            BorderThickness="0"/>
+
+                        </Border>
+
+                    </Grid>
+
+                </Border>
+                <!--#endregion-->
+
+                <!--#region UML Grid-->
+                <Border
+                        Grid.Column="0"
+                        Grid.ColumnSpan="10"
+                        Grid.Row="3"
+                        Style="{DynamicResource SectionBorder}">
+
+                    <Grid 
+                            x:Name="UMLGrid"
+                            Margin="5">
+
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="5"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="5"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="30"/>
+                            <RowDefinition Height="30"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- UML Grid Title -->
+                        <TextBlock 
+                                Grid.Column="0"
+                                Grid.ColumnSpan="5"
+                                Grid.Row="0"
+                                Text="UML Diagram"
+                                Style="{DynamicResource HeaderTextBlock}"/>
+
+
+                        <!-- UML Parent Object Container Header -->
+                        <TextBlock
+                                Grid.Column="0"
+                                Grid.Row="1"
+                                Text="Parents"
+                                Style="{DynamicResource UMLObjectHeader}"/>
+
+
+                        <!-- UML Selected Object Header -->
+                        <TextBlock
+                                Grid.Column="2"
+                                Grid.Row="1"
+                                Text="Selected Object"
+                                Style="{DynamicResource UMLObjectHeader}"/>
+
+
+                        <!-- UML Child Object Container Header -->
+                        <TextBlock
+                                Grid.Column="4"
+                                Grid.Row="1"
+                                Text="Children"
+                                Style="{DynamicResource UMLObjectHeader}"/>
+
+                        <!--#region UML Parent Object Details -->
+                        <Border 
+                                    x:Name="UMLParentObjectBorder"
+                                        Grid.Column="0"
+                                        Grid.Row="2"
+                                    Style="{DynamicResource UMLObjectBorder}">
+
+                            <Grid
+                                        x:Name="UMLParentObjectGrid">
+
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+
+                                <!-- UML Selected Object Server -->
+                                <TextBlock
+                                            x:Name="UMLParentObjectServer"
+                                            Grid.Column="0"
+                                            Grid.Row="0"
+                                            Style="{DynamicResource TooltipHeader}"/>
+
+                                <!-- UML Selected Object Name -->
+                                <TextBlock
+                                            x:Name="UMLParentObjectName"
+                                            Grid.Column="0"
+                                            Grid.Row="1"
+                                            Style="{DynamicResource UMLObjectHeader}"/>
+
+                                <!-- UML Selected Object Fields -->
+                                <ListView
+                                            x:Name="UMLParentObjectFields"
+                                            Grid.Column="0"
+                                            Grid.Row="2"
+                                            MaxHeight="340"
+                                            Style="{DynamicResource UMLListView}"
+                                            ItemsSource="{Binding ParentColumns}">
+                                    <ListView.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding FullFieldName}"/>
+                                        </DataTemplate>
+                                    </ListView.ItemTemplate>
+                                    <ListView.ItemContainerStyle>
+                                        <Style TargetType="{x:Type ListViewItem}">
+                                            <Setter Property="ToolTip">
+                                                <Setter.Value>
+
+                                                    <Border Style="{DynamicResource TooltipBorder}">
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                        </Grid.ColumnDefinitions>
+
+                                                        <Grid.RowDefinitions>
+                                                            <RowDefinition Height="Auto"/>
+                                                            <RowDefinition Height="Auto"/>
+                                                            <RowDefinition Height="Auto"/>
+                                                        </Grid.RowDefinitions>
+
+                                                        <TextBlock Grid.Column="0"
+                                                                           Grid.Row="0"
+                                                                           Text="Field Name: "/>
+                                                        <TextBlock Grid.Column="1"
+                                                                           Grid.Row="0"
+                                                                           Text="{Binding FullFieldName}"/>
+
+                                                        <TextBlock Grid.Column="0"
+                                                                           Grid.Row="1"
+                                                                           Text="Nullable: "/>
+                                                        <TextBlock Grid.Column="1"
+                                                                           Grid.Row="1"
+                                                                           Text="{Binding IsNullable}"/>
+
+                                                        <TextBlock Grid.Column="0"
+                                                                           Grid.Row="2"
+                                                                           Text="Oridinal #: "/>
+                                                        <TextBlock Grid.Column="1"
+                                                                           Grid.Row="2"
+                                                                           Text="{Binding OrdinalNumber}"/>
+                                                    </Grid>
+                                                    </Border>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </Style>
+                                    </ListView.ItemContainerStyle>
+                                </ListView>
+
+                            </Grid>
+
+                        </Border>
+                        <!--#endregion-->
+
+
+                        <!--#region UML Selected Object Details -->
+                        <Border 
+                                    x:Name="UMLSelectedObjectBorder"
+                                Grid.Column="2"
+                                      Grid.Row="2"
+                                    Style="{StaticResource UMLObjectBorder}">
+
+                            <Grid
+                                        x:Name="UMLSelectedObjectGrid">
+
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+
+                                <!-- UML Selected Object Server -->
+                                <TextBlock
+                                            x:Name="UMLSelectedObjectServer"
+                                            Grid.Column="0"
+                                            Grid.Row="0"
+                                            Style="{StaticResource TooltipHeader}"/>
+
+                                <!-- UML Selected Object Name -->
+                                <TextBlock
+                                            x:Name="UMLSelectedObjectName"
+                                            Grid.Column="0"
+                                            Grid.Row="1"
+                                            Style="{StaticResource UMLObjectHeader}"/>
+
+                                <!-- UML Selected Object Fields -->
+                                <ListView
+                                            x:Name="UMLSelectedObjectFields"
+                                            Grid.Column="0"
+                                            Grid.Row="2"
+                                            Style="{StaticResource UMLListBox}"
+                                            ItemsSource="{Binding Columns}">
+                                    <ListView.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding FullFieldName}"/>
+                                        </DataTemplate>
+                                    </ListView.ItemTemplate>
+                                    <ListView.ItemContainerStyle>
+                                        <Style TargetType="{x:Type ListViewItem}">
+                                            <Setter Property="ToolTip">
+                                                <Setter.Value>
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                        </Grid.ColumnDefinitions>
+
+                                                        <Grid.RowDefinitions>
+                                                            <RowDefinition Height="Auto"/>
+                                                            <RowDefinition Height="Auto"/>
+                                                            <RowDefinition Height="Auto"/>
+                                                        </Grid.RowDefinitions>
+
+                                                        <TextBlock Grid.Column="0"
+                                                                           Grid.Row="0"
+                                                                           Text="Field Name: "/>
+                                                        <TextBlock Grid.Column="1"
+                                                                           Grid.Row="0"
+                                                                           Text="{Binding FullFieldName}"/>
+
+                                                        <TextBlock Grid.Column="0"
+                                                                           Grid.Row="1"
+                                                                           Text="Nullable: "/>
+                                                        <TextBlock Grid.Column="1"
+                                                                           Grid.Row="1"
+                                                                           Text="{Binding IsNullable}"/>
+
+                                                        <TextBlock Grid.Column="0"
+                                                                           Grid.Row="2"
+                                                                           Text="Oridinal #: "/>
+                                                        <TextBlock Grid.Column="1"
+                                                                           Grid.Row="2"
+                                                                           Text="{Binding OrdinalNumber}"/>
+                                                    </Grid>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </Style>
+                                    </ListView.ItemContainerStyle>
+                                </ListView>
+
+                            </Grid>
+
+                        </Border>
+                        <!--#endregion-->
+
+                        <!--#region UML Child Object Details -->
+                        <Border 
+                                    x:Name="UMLChildObjectBorder"
+                                        Grid.Column="4"
+                                        Grid.Row="2"
+                                    Style="{StaticResource UMLObjectBorder}">
+
+                            <Grid
+                                        x:Name="UMLChildObjectGrid">
+
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+
+                                <!-- UML Selected Object Server -->
+                                <TextBlock
+                                            x:Name="UMLChildObjectServer"
+                                            Grid.Column="0"
+                                            Grid.Row="0"
+                                            Style="{StaticResource TooltipHeader}"/>
+
+                                <!-- UML Selected Object Name -->
+                                <TextBlock
+                                            x:Name="UMLChildObjectName"
+                                            Grid.Column="0"
+                                            Grid.Row="1"
+                                            Style="{StaticResource UMLObjectHeader}"/>
+
+                                <!-- UML Selected Object Fields -->
+                                <ListView
+                                            x:Name="UMLChildObjectFields"
+                                            Grid.Column="0"
+                                            Grid.Row="2"
+                                            Style="{StaticResource UMLListBox}"
+                                            ItemsSource="{Binding ChildColumns}">
+                                    <ListView.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding FullFieldName}"/>
+                                        </DataTemplate>
+                                    </ListView.ItemTemplate>
+                                    <ListView.ItemContainerStyle>
+                                        <Style TargetType="{x:Type ListViewItem}">
+                                            <Setter Property="ToolTip">
+                                                <Setter.Value>
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                        </Grid.ColumnDefinitions>
+
+                                                        <Grid.RowDefinitions>
+                                                            <RowDefinition Height="Auto"/>
+                                                            <RowDefinition Height="Auto"/>
+                                                            <RowDefinition Height="Auto"/>
+                                                        </Grid.RowDefinitions>
+
+                                                        <TextBlock Grid.Column="0"
+                                                                           Grid.Row="0"
+                                                                           Text="Field Name: "/>
+                                                        <TextBlock Grid.Column="1"
+                                                                           Grid.Row="0"
+                                                                           Text="{Binding FullFieldName}"/>
+
+                                                        <TextBlock Grid.Column="0"
+                                                                           Grid.Row="1"
+                                                                           Text="Nullable: "/>
+                                                        <TextBlock Grid.Column="1"
+                                                                           Grid.Row="1"
+                                                                           Text="{Binding IsNullable}"/>
+
+                                                        <TextBlock Grid.Column="0"
+                                                                           Grid.Row="2"
+                                                                           Text="Oridinal #: "/>
+                                                        <TextBlock Grid.Column="1"
+                                                                           Grid.Row="2"
+                                                                           Text="{Binding OrdinalNumber}"/>
+                                                    </Grid>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </Style>
+                                    </ListView.ItemContainerStyle>
+                                </ListView>
+
+                            </Grid>
+
+                        </Border>
+                        <!--#endregion-->
+                        
+                    </Grid>
+
+                </Border>
+                <!--#endregion-->
+                
+            </Grid>
+            
+        </Grid>
+        
+    </DockPanel>
+    
+</UserControl>
